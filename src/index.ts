@@ -1,6 +1,6 @@
 import { State } from "./state.js";
 
-const canvas = document.getElementById("canvas");
+const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d");
 var isMovingShape = false;
 var states = [];
@@ -13,6 +13,7 @@ const onResize = () => {
 
 const getMousePosOnCanvas = () => {
   let rect = canvas.getBoundingClientRect();
+  let event = window.event as any;
   return {
     x: ((event.clientX - rect.left) / (rect.right - rect.left)) * canvas.width,
     y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height,
@@ -82,7 +83,7 @@ const getHighlightedState = () => {
   }
 };
 
-const onKeyDown = async (event) => {
+const onKeyDown = (event) => {
   if (event.key.toLowerCase() == "backspace") {
     input = input.slice(0, -1);
   } else if (event.key.toLowerCase() == "delete") {
