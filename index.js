@@ -1,38 +1,38 @@
 import { State } from "./state.js";
 
-const canvas = document.getElementById("main-canvas");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 var isMovingShape = false;
 var states = [];
 var input = "";
-var hightlightedState;
 const onResize = () => {
   resizeCanvas();
   clearCanvas();
   draw();
 };
 
-const getMousePos = (event) => {
-  let pos = event.target.getBoundingClientRect();
-  let x = event.clientX - pos.left;
-  let y = event.clientY - pos.top;
-  return { x, y };
+const getMousePosOnCanvas = () => {
+  let rect = canvas.getBoundingClientRect();
+  return {
+    x: ((event.clientX - rect.left) / (rect.right - rect.left)) * canvas.width,
+    y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height,
+  };
 };
 
 const onMouseDown = (event) => {
-  const stateUnderCursor = getStateUnderCursor(ctx, event);
+  const stateUnderCursor = getStateUnderCursor(ctx);
 
   if (stateUnderCursor) {
     isMovingShape = true;
     return;
   }
 
-  const mousePos = getMousePos(event);
-  drawState(mousePos.x, mousePos.y);
+  const mousePos = getMousePosOnCanvas();
+  states.push(new State(ctx, mousePos.x, mousePos.y).draw());
 };
 
-const getStateUnderCursor = (ctx, event) => {
-  const mousePos = getMousePos(event);
+const getStateUnderCursor = (ctx) => {
+  const mousePos = getMousePosOnCanvas();
   const { x: mouseX } = mousePos;
   const { y: mouseY } = mousePos;
 
@@ -45,9 +45,9 @@ const getStateUnderCursor = (ctx, event) => {
 
 const onMouseMove = (event) => {
   if (!isMovingShape) return;
-  const mousePos = getMousePos(event);
+  const mousePos = getMousePosOnCanvas();
 
-  let state = getStateUnderCursor(ctx, event);
+  let state = getStateUnderCursor(ctx);
   state.x = mousePos.x;
   state.y = mousePos.y;
 
@@ -56,21 +56,29 @@ const onMouseMove = (event) => {
 };
 
 const onDbClick = (event) => {
-  let state = getStateUnderCursor(ctx, event);
-  state.setIsAccepting(ctx, !state.isAccepting);
+  let state = getStateUnderCursor(ctx);
+  state.setIsAccepting(!state.isAccepting);
   clearCanvas();
   draw();
 };
 
 const onClick = (event) => {
-  const mousePos = getMousePos(event);
+  const mousePos = getMousePosOnCanvas();
 
   for (let state of states) {
     if (ctx.isPointInPath(state.shape, mousePos.x, mousePos.y)) {
-      state.setHightLight(ctx, true);
-      hightlightedState = state;
+      state.setHightLight(true);
       input = state.text;
-    } else state.setHightLight(ctx, false);
+    } else state.setHightLight(false);
+  }
+
+  clearCanvas();
+  draw();
+};
+
+const getHighlightedState = () => {
+  for (let state of states) {
+    if (state.isHighlighted) return state;
   }
 };
 
@@ -78,17 +86,17 @@ const onKeyDown = async (event) => {
   if (event.key.toLowerCase() == "backspace") {
     input = input.slice(0, -1);
   } else if (event.key.toLowerCase() == "delete") {
-    states.splice(states.indexOf(hightlightedState), 1);
-    hightlightedState = null;
+    states.splice(states.indexOf(getHighlightedState()), 1);
     clearCanvas();
     draw();
   } else {
     input += String.fromCharCode(event.keyCode);
   }
 
+  let hightlightedState = getHighlightedState();
   if (hightlightedState) {
     clearCanvas();
-    hightlightedState.addText(ctx, input);
+    hightlightedState.drawText(input);
     draw();
   }
 };
@@ -110,43 +118,16 @@ const draw = () => {
   let statesCopy = states;
   states = [];
   for (let state of statesCopy) {
-    let newState = drawState(state.x, state.y, state.r, state.text);
-    newState.setIsAccepting(ctx, state.isAccepting);
-    if (state.isHighlighted) {
-      newState.setHightLight(ctx, state.isHighlighted);
-      hightlightedState = newState;
-    }
+    let newState = new State(ctx, state.x, state.y, state.r, state.text);
+    newState.isAccepting = state.isAccepting;
+    newState.isHighlighted = state.isHighlighted;
+    newState.draw();
+    states.push(newState);
   }
 };
 
 const clearCanvas = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-};
-
-const drawState = (
-  x,
-  y,
-  r = 50,
-  text = "",
-  strokeThicc = 4,
-  strokeColor = "black",
-  bgColor = "transparent"
-) => {
-  let circle = new Path2D();
-  circle.arc(x, y, r, 0, Math.PI * 2, true); // Outer circle
-  ctx.lineWidth = strokeThicc;
-  ctx.fillStyle = bgColor;
-  ctx.fill(circle);
-  ctx.strokeStyle = strokeColor;
-  ctx.stroke(circle);
-
-  let state = new State(circle, x, y, r);
-  if (text) state.addText(ctx, text);
-
-  state.setIsAccepting(ctx, state.isAccepting);
-
-  states.push(state);
-  return state;
 };
 
 resizeCanvas();

@@ -1,43 +1,65 @@
 export class State {
   id;
   shape;
-  text = "";
+  text;
   isAccepting = false;
-  isHighlighted;
+  isHighlighted = false;
   x;
   y;
   r;
+  ctx;
 
-  constructor(shape, x, y, r) {
+  constructor(ctx, x, y, r = 50, text = "") {
     this.id = uuidv4();
-    this.shape = shape;
+    this.ctx = ctx;
+    this.text = text;
     this.y = y;
     this.x = x;
     this.r = r;
   }
 
-  setIsAccepting(ctx, isAccepting) {
+  setIsAccepting(isAccepting) {
     this.isAccepting = isAccepting;
     if (this.isAccepting) {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.r - 10, 0, 2 * Math.PI, false);
-      ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.arc(this.x, this.y, this.r - 10, 0, 2 * Math.PI, false);
+      this.ctx.stroke();
     }
   }
 
-  setHightLight(ctx, isHighlighted) {
+  setHightLight(isHighlighted) {
     this.isHighlighted = isHighlighted;
-    if (this.isHighlighted) ctx.strokeStyle = "green";
-    else ctx.strokeStyle = "black";
-    ctx.stroke(this.shape);
+    if (this.isHighlighted) this.ctx.strokeStyle = "teal";
+    else this.ctx.strokeStyle = "black";
+    this.ctx.stroke(this.shape);
   }
 
-  addText(ctx, text) {
-    let textWidth = ctx.measureText(text).width;
-    ctx.fillStyle = "black";
-    ctx.font = "bold 24px serif";
-    ctx.fillText(text, this.x - textWidth / 2, this.y + 6);
+  drawText(text) {
     this.text = text;
+    let textWidth = this.ctx.measureText(text).width;
+    this.ctx.fillStyle = "black";
+    this.ctx.font = "bold 24px serif";
+    this.ctx.fillText(text, this.x - textWidth / 2, this.y + 6);
+  }
+
+  draw() {
+    const strokeThicc = 4;
+    const strokeColor = "black";
+    const bgColor = "transparent";
+    let circle = new Path2D();
+    circle.arc(this.x, this.y, this.r, 0, Math.PI * 2, true); // Outer circle
+    this.ctx.lineWidth = strokeThicc;
+    this.ctx.fillStyle = bgColor;
+    this.ctx.fill(circle);
+    this.ctx.strokeStyle = strokeColor;
+    this.ctx.stroke(circle);
+    this.shape = circle;
+
+    this.setIsAccepting(this.isAccepting);
+    this.setHightLight(this.isHighlighted);
+    this.drawText(this.text);
+
+    return this;
   }
 }
 const uuidv4 = () => {
