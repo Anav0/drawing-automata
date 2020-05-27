@@ -41,15 +41,23 @@ export class Link extends AutomataDrawing {
     line.closePath();
     this.ctx.stroke(line);
     this.shape = line;
+
+    this.drawText(this.text);
+
     return this;
   }
 
   drawText(text): void {
     this.text = text;
-    let textWidth = this.ctx.measureText(text).width;
+
+    var textX = (this.x + this.endX) / 2;
+    var textY = (this.y + this.endY) / 2;
+    let textWidth = this.ctx.measureText(text).width / 2;
+
     this.ctx.fillStyle = "black";
     this.ctx.font = "bold 24px serif";
-    this.ctx.fillText(text, this.x / 2 - textWidth / 2, this.y + 6);
+    let offsetX = Math.abs(this.y - this.endY) > 50 ? 20 : 0;
+    this.ctx.fillText(text, textX - textWidth - offsetX, textY - 20);
   }
 
   onDbClick(): void {

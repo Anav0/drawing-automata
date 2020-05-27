@@ -129,7 +129,9 @@ const onKeyDown = (event) => {
   } else if (event.key.toLowerCase() == "shift") {
     isShiftPressed = true;
   } else {
-    input += String.fromCharCode(event.keyCode);
+    let letter = String.fromCharCode(event.keyCode);
+    if (!event.shiftKey) letter = letter.toLowerCase();
+    input += letter;
   }
 
   let hightlightedState = getHighlightedDrawing();
