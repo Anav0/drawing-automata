@@ -14,6 +14,7 @@ export abstract class Drawing {
 
   abstract draw(): Drawing;
   abstract onDbClick(): void;
+  abstract move(mouseX: number, mouseY: number): void;
 }
 const uuidv4 = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {

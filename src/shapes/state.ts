@@ -30,16 +30,18 @@ export class State extends AutomataDrawing {
     this.ctx.fillText(text, this.x - textWidth / 2, this.y + 6);
   }
 
+  move(mouseX: number, mouseY: number): void {
+    this.x = mouseX;
+    this.y = mouseY;
+  }
+
   draw(): Drawing {
-    const strokeThicc = 4;
-    const strokeColor = "black";
-    const bgColor = "transparent";
     let circle = new Path2D();
     circle.arc(this.x, this.y, this.r, 0, Math.PI * 2, true); // Outer circle
-    this.ctx.lineWidth = strokeThicc;
-    this.ctx.fillStyle = bgColor;
+    this.ctx.lineWidth = 4;
+    this.ctx.fillStyle = "transparent";
+    this.ctx.strokeStyle = "black";
     this.ctx.fill(circle);
-    this.ctx.strokeStyle = strokeColor;
     this.ctx.stroke(circle);
     this.shape = circle;
 

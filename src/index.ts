@@ -5,9 +5,12 @@ import { AutomataDrawing } from "./shapes/automataDrawing.js";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d");
-var isMovingShape = false;
+var isMouseDown = false;
+var isShiftPressed = false;
 var drawings: Drawing[] = [];
 var input = "";
+var tmpLink: Link;
+var movingDrawing: Drawing;
 
 const getMousePosOnCanvas = () => {
   let rect = canvas.getBoundingClientRect();
@@ -23,43 +26,66 @@ const getDrawingUnderCursor = (ctx) => {
   const { x: mouseX } = mousePos;
   const { y: mouseY } = mousePos;
 
+  if (tmpLink) {
+    if (
+      ctx.isPointInPath(tmpLink.shape, mouseX, mouseY) ||
+      ctx.isPointInStroke(tmpLink.shape, mouseX, mouseY)
+    ) {
+      return tmpLink;
+    }
+  }
+
   for (let drawing of drawings) {
-    let isPointInPath = drawing.ctx.isPointInPath(
-      drawing.shape,
-      mouseX,
-      mouseY
-    );
-    let isPointInStroke = drawing.ctx.isPointInStroke(
-      drawing.shape,
-      mouseX,
-      mouseY
-    );
+    let isPointInPath = ctx.isPointInPath(drawing.shape, mouseX, mouseY);
+    let isPointInStroke = ctx.isPointInStroke(drawing.shape, mouseX, mouseY);
     if (isPointInPath || isPointInStroke) {
       return drawing;
     }
   }
 };
 
-const onMouseDown = (event) => {
+const onMouseUp = (event) => {
   const stateUnderCursor = getDrawingUnderCursor(ctx);
 
-  if (stateUnderCursor) {
-    isMovingShape = true;
+  if (tmpLink && stateUnderCursor == tmpLink) {
+    drawings.push(tmpLink);
+    tmpLink = null;
+    redraw();
+  }
+};
+
+const onMouseDown = (event) => {
+  isMouseDown = true;
+  const drawingUnderCursor = getDrawingUnderCursor(ctx);
+  movingDrawing = drawingUnderCursor;
+  if (drawingUnderCursor) {
     return;
   }
-
   const mousePos = getMousePosOnCanvas();
+  if (isShiftPressed) {
+    tmpLink = new Link(
+      ctx,
+      mousePos.x,
+      mousePos.y,
+      mousePos.x,
+      mousePos.y
+    ).draw() as Link;
+
+    return;
+  }
 
   drawings.push(new State(ctx, mousePos.x, mousePos.y).draw());
 };
 
 const onMouseMove = (event) => {
-  if (!isMovingShape) return;
-  const mousePos = getMousePosOnCanvas();
-  let drawing = getDrawingUnderCursor(ctx);
+  if (!isMouseDown) return;
 
-  drawing.x = mousePos.x;
-  drawing.y = mousePos.y;
+  const mousePos = getMousePosOnCanvas();
+  if (tmpLink && isShiftPressed) {
+    tmpLink.move(mousePos.x, mousePos.y);
+  } else {
+    movingDrawing.move(mousePos.x, mousePos.y);
+  }
 
   redraw();
 };
@@ -67,14 +93,18 @@ const onMouseMove = (event) => {
 const onDbClick = (event) => {
   let drawing = getDrawingUnderCursor(ctx);
   drawing.onDbClick();
+  redraw();
 };
 
 const onClick = (event) => {
   const clickedDrawing = getDrawingUnderCursor(ctx);
   if (!clickedDrawing) return;
+
   const automataDrawings = drawings.map(
     (drawing) => drawing as AutomataDrawing
   );
+  if (tmpLink) automataDrawings.push(tmpLink);
+
   for (let automataDrawing of automataDrawings) {
     if (automataDrawing.id === clickedDrawing.id) {
       automataDrawing.drawHighlight(true);
@@ -96,6 +126,8 @@ const onKeyDown = (event) => {
   } else if (event.key.toLowerCase() == "delete") {
     drawings.splice(drawings.indexOf(getHighlightedDrawing()), 1);
     redraw();
+  } else if (event.key.toLowerCase() == "shift") {
+    isShiftPressed = true;
   } else {
     input += String.fromCharCode(event.keyCode);
   }
@@ -108,6 +140,12 @@ const onKeyDown = (event) => {
   }
 };
 
+const onKeyUp = (event) => {
+  if (event.key.toLowerCase() == "shift") {
+    isShiftPressed = false;
+  }
+};
+
 const onResize = () => {
   resizeCanvas();
   redraw();
@@ -115,18 +153,24 @@ const onResize = () => {
 
 window.addEventListener("resize", onResize);
 canvas.addEventListener("mousedown", onMouseDown);
-canvas.addEventListener("mouseup", () => (isMovingShape = false));
+canvas.addEventListener("mouseup", onMouseUp);
+canvas.addEventListener("mouseup", () => (isMouseDown = false));
 canvas.addEventListener("mousemove", onMouseMove);
 canvas.addEventListener("dblclick", onDbClick);
 canvas.addEventListener("click", onClick);
 window.addEventListener("keydown", onKeyDown);
+window.addEventListener("keyup", onKeyUp);
 
 const resizeCanvas = () => {
   canvas.width = window.innerWidth - 150;
   canvas.height = window.innerHeight - 200;
 };
 
-const draw = () => drawings.map((drawing) => drawing.draw());
+const draw = () => {
+  drawings.map((drawing) => drawing.draw());
+
+  if (tmpLink) tmpLink.draw();
+};
 
 const clearCanvas = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
