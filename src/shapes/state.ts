@@ -1,40 +1,28 @@
-export class State {
-  id;
-  shape;
-  text;
-  isAccepting = false;
-  isHighlighted = false;
-  x;
-  y;
-  r;
-  ctx;
+import { Drawing } from "./drawing.js";
+import { AutomataDrawing } from "./automataDrawing.js";
+
+export class State extends AutomataDrawing {
+  text: string;
+  r: number;
+  isAccepting: boolean = false;
 
   constructor(ctx, x, y, r = 50, text = "") {
-    this.id = uuidv4();
-    this.ctx = ctx;
+    super(ctx, x, y);
     this.text = text;
-    this.y = y;
-    this.x = x;
     this.r = r;
   }
 
-  setIsAccepting(isAccepting) {
+  drawIsAccepting(isAccepting): void {
     this.isAccepting = isAccepting;
     if (this.isAccepting) {
       this.ctx.beginPath();
+      this.ctx.strokeStyle = "black";
       this.ctx.arc(this.x, this.y, this.r - 10, 0, 2 * Math.PI, false);
       this.ctx.stroke();
     }
   }
 
-  setHightLight(isHighlighted) {
-    this.isHighlighted = isHighlighted;
-    if (this.isHighlighted) this.ctx.strokeStyle = "teal";
-    else this.ctx.strokeStyle = "black";
-    this.ctx.stroke(this.shape);
-  }
-
-  drawText(text) {
+  drawText(text): void {
     this.text = text;
     let textWidth = this.ctx.measureText(text).width;
     this.ctx.fillStyle = "black";
@@ -42,7 +30,7 @@ export class State {
     this.ctx.fillText(text, this.x - textWidth / 2, this.y + 6);
   }
 
-  draw() {
+  draw(): Drawing {
     const strokeThicc = 4;
     const strokeColor = "black";
     const bgColor = "transparent";
@@ -55,17 +43,14 @@ export class State {
     this.ctx.stroke(circle);
     this.shape = circle;
 
-    this.setIsAccepting(this.isAccepting);
-    this.setHightLight(this.isHighlighted);
+    this.drawIsAccepting(this.isAccepting);
+    this.drawHighlight(this.isHighlighted);
     this.drawText(this.text);
 
     return this;
   }
+
+  onDbClick(): void {
+    this.drawIsAccepting(!this.isAccepting);
+  }
 }
-const uuidv4 = () => {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};

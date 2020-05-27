@@ -1,15 +1,13 @@
-import { State } from "./state.js";
+import { State } from "./shapes/state.js";
+import { Drawing } from "./shapes/drawing.js";
+import { Link } from "./shapes/Link.js";
+import { AutomataDrawing } from "./shapes/automataDrawing.js";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d");
 var isMovingShape = false;
-var states = [];
+var drawings: Drawing[] = [];
 var input = "";
-const onResize = () => {
-  resizeCanvas();
-  clearCanvas();
-  draw();
-};
 
 const getMousePosOnCanvas = () => {
   let rect = canvas.getBoundingClientRect();
@@ -20,8 +18,30 @@ const getMousePosOnCanvas = () => {
   };
 };
 
+const getDrawingUnderCursor = (ctx) => {
+  const mousePos = getMousePosOnCanvas();
+  const { x: mouseX } = mousePos;
+  const { y: mouseY } = mousePos;
+
+  for (let drawing of drawings) {
+    let isPointInPath = drawing.ctx.isPointInPath(
+      drawing.shape,
+      mouseX,
+      mouseY
+    );
+    let isPointInStroke = drawing.ctx.isPointInStroke(
+      drawing.shape,
+      mouseX,
+      mouseY
+    );
+    if (isPointInPath || isPointInStroke) {
+      return drawing;
+    }
+  }
+};
+
 const onMouseDown = (event) => {
-  const stateUnderCursor = getStateUnderCursor(ctx);
+  const stateUnderCursor = getDrawingUnderCursor(ctx);
 
   if (stateUnderCursor) {
     isMovingShape = true;
@@ -29,57 +49,44 @@ const onMouseDown = (event) => {
   }
 
   const mousePos = getMousePosOnCanvas();
-  states.push(new State(ctx, mousePos.x, mousePos.y).draw());
-};
 
-const getStateUnderCursor = (ctx) => {
-  const mousePos = getMousePosOnCanvas();
-  const { x: mouseX } = mousePos;
-  const { y: mouseY } = mousePos;
-
-  for (let state of states) {
-    if (ctx.isPointInPath(state.shape, mouseX, mouseY)) {
-      return state;
-    }
-  }
+  drawings.push(new State(ctx, mousePos.x, mousePos.y).draw());
 };
 
 const onMouseMove = (event) => {
   if (!isMovingShape) return;
   const mousePos = getMousePosOnCanvas();
+  let drawing = getDrawingUnderCursor(ctx);
 
-  let state = getStateUnderCursor(ctx);
-  state.x = mousePos.x;
-  state.y = mousePos.y;
+  drawing.x = mousePos.x;
+  drawing.y = mousePos.y;
 
-  clearCanvas();
-  draw();
+  redraw();
 };
 
 const onDbClick = (event) => {
-  let state = getStateUnderCursor(ctx);
-  state.setIsAccepting(!state.isAccepting);
-  clearCanvas();
-  draw();
+  let drawing = getDrawingUnderCursor(ctx);
+  drawing.onDbClick();
 };
 
 const onClick = (event) => {
-  const mousePos = getMousePosOnCanvas();
-
-  for (let state of states) {
-    if (ctx.isPointInPath(state.shape, mousePos.x, mousePos.y)) {
-      state.setHightLight(true);
-      input = state.text;
-    } else state.setHightLight(false);
+  const clickedDrawing = getDrawingUnderCursor(ctx);
+  if (!clickedDrawing) return;
+  const automataDrawings = drawings.map(
+    (drawing) => drawing as AutomataDrawing
+  );
+  for (let automataDrawing of automataDrawings) {
+    if (automataDrawing.id === clickedDrawing.id) {
+      automataDrawing.drawHighlight(true);
+      input = automataDrawing.text;
+    } else automataDrawing.drawHighlight(false);
   }
-
-  clearCanvas();
-  draw();
 };
 
-const getHighlightedState = () => {
-  for (let state of states) {
-    if (state.isHighlighted) return state;
+const getHighlightedDrawing = () => {
+  for (let drawing of drawings) {
+    let automataDrawing = drawing as AutomataDrawing;
+    if (automataDrawing.isHighlighted) return automataDrawing;
   }
 };
 
@@ -87,19 +94,23 @@ const onKeyDown = (event) => {
   if (event.key.toLowerCase() == "backspace") {
     input = input.slice(0, -1);
   } else if (event.key.toLowerCase() == "delete") {
-    states.splice(states.indexOf(getHighlightedState()), 1);
-    clearCanvas();
-    draw();
+    drawings.splice(drawings.indexOf(getHighlightedDrawing()), 1);
+    redraw();
   } else {
     input += String.fromCharCode(event.keyCode);
   }
 
-  let hightlightedState = getHighlightedState();
+  let hightlightedState = getHighlightedDrawing();
   if (hightlightedState) {
     clearCanvas();
     hightlightedState.drawText(input);
     draw();
   }
+};
+
+const onResize = () => {
+  resizeCanvas();
+  redraw();
 };
 
 window.addEventListener("resize", onResize);
@@ -115,20 +126,15 @@ const resizeCanvas = () => {
   canvas.height = window.innerHeight - 200;
 };
 
-const draw = () => {
-  let statesCopy = states;
-  states = [];
-  for (let state of statesCopy) {
-    let newState = new State(ctx, state.x, state.y, state.r, state.text);
-    newState.isAccepting = state.isAccepting;
-    newState.isHighlighted = state.isHighlighted;
-    newState.draw();
-    states.push(newState);
-  }
-};
+const draw = () => drawings.map((drawing) => drawing.draw());
 
 const clearCanvas = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+const redraw = () => {
+  clearCanvas();
+  draw();
 };
 
 resizeCanvas();
