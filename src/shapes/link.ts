@@ -1,9 +1,12 @@
 import { Drawing } from "./drawing.js";
 import { AutomataDrawing } from "./automataDrawing.js";
+import { State } from "./state.js";
 
 export class Link extends AutomataDrawing {
   endX: number;
   endY: number;
+  endState: State;
+  startState: State;
 
   constructor(ctx, x, y, endX, endY) {
     super(ctx, x, y);
@@ -18,12 +21,18 @@ export class Link extends AutomataDrawing {
   }
 
   draw(): Drawing {
+    if (this.endState) this.setEndAnchor();
+    if (this.startState) this.setStartAnchor();
+
     let line = new Path2D();
     this.ctx.beginPath();
     this.ctx.strokeStyle = "black";
     this.ctx.lineWidth = 4;
+    // draw line
     line.moveTo(this.x, this.y);
     line.lineTo(this.endX, this.endY);
+
+    // draw arrowhead
     let headlen = this.ctx.lineWidth * 5;
     let arrowSpread = 6;
     let angle = Math.atan2(this.endY - this.y, this.endX - this.x);
@@ -62,5 +71,27 @@ export class Link extends AutomataDrawing {
 
   onDbClick(): void {
     throw new Error("Method not implemented.");
+  }
+
+  setEndAnchor() {
+    let coord = this.endState.closestPointOnCircle(this.x, this.y);
+    this.endX = coord.x;
+    this.endY = coord.y;
+  }
+
+  setStartAnchor() {
+    let coord = this.startState.closestPointOnCircle(this.endX, this.endY);
+    this.x = coord.x;
+    this.y = coord.y;
+  }
+
+  setEndState(state: State) {
+    this.endState = state;
+    this.setEndAnchor();
+  }
+
+  setStartState(state: State) {
+    this.startState = state;
+    this.setStartAnchor();
   }
 }

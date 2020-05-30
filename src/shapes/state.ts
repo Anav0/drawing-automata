@@ -55,4 +55,14 @@ export class State extends AutomataDrawing {
   onDbClick(): void {
     this.drawIsAccepting(!this.isAccepting);
   }
+
+  closestPointOnCircle(x, y) {
+    let dx = x - this.x;
+    let dy = y - this.y;
+    let scale = Math.sqrt(dx * dx + dy * dy);
+    return {
+      x: this.x + (dx * this.r) / scale,
+      y: this.y + (dy * this.r) / scale,
+    };
+  }
 }

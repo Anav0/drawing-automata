@@ -21,8 +21,9 @@ const getMousePosOnCanvas = () => {
   };
 };
 
-const getDrawingUnderCursor = (ctx) => {
+const getDrawingsUnderCursor = (ctx) => {
   const mousePos = getMousePosOnCanvas();
+  let drawingUnderCursor: Drawing[] = [];
   const { x: mouseX } = mousePos;
   const { y: mouseY } = mousePos;
 
@@ -31,7 +32,7 @@ const getDrawingUnderCursor = (ctx) => {
       ctx.isPointInPath(tmpLink.shape, mouseX, mouseY) ||
       ctx.isPointInStroke(tmpLink.shape, mouseX, mouseY)
     ) {
-      return tmpLink;
+      drawingUnderCursor.push(tmpLink);
     }
   }
 
@@ -39,41 +40,39 @@ const getDrawingUnderCursor = (ctx) => {
     let isPointInPath = ctx.isPointInPath(drawing.shape, mouseX, mouseY);
     let isPointInStroke = ctx.isPointInStroke(drawing.shape, mouseX, mouseY);
     if (isPointInPath || isPointInStroke) {
-      return drawing;
+      drawingUnderCursor.push(drawing);
     }
   }
+  return drawingUnderCursor;
 };
 
 const onMouseUp = (event) => {
-  const stateUnderCursor = getDrawingUnderCursor(ctx);
+  const stateUnderCursor = getDrawingsUnderCursor(ctx);
 
-  if (tmpLink && stateUnderCursor == tmpLink) {
-    drawings.push(tmpLink);
-    tmpLink = null;
-    redraw();
+  for (let underCursorDrawing of stateUnderCursor) {
+    if (tmpLink && underCursorDrawing.id !== tmpLink.id) {
+      tmpLink.setEndState(underCursorDrawing as State);
+      drawings.push(tmpLink);
+      break;
+    }
   }
+  tmpLink = null;
+  redraw();
 };
 
 const onMouseDown = (event) => {
   isMouseDown = true;
-  const drawingUnderCursor = getDrawingUnderCursor(ctx);
-  movingDrawing = drawingUnderCursor;
-  if (drawingUnderCursor) {
-    return;
-  }
+  const drawingUnderCursor = getDrawingsUnderCursor(ctx)[0];
   const mousePos = getMousePosOnCanvas();
-  if (isShiftPressed) {
-    tmpLink = new Link(
-      ctx,
-      mousePos.x,
-      mousePos.y,
-      mousePos.x,
-      mousePos.y
-    ).draw() as Link;
 
+  if (isShiftPressed) {
+    tmpLink = new Link(ctx, mousePos.x, mousePos.y, mousePos.x, mousePos.y);
+    tmpLink.setStartState(drawingUnderCursor as State);
+    return;
+  } else if (drawingUnderCursor) {
+    movingDrawing = drawingUnderCursor;
     return;
   }
-
   drawings.push(new State(ctx, mousePos.x, mousePos.y).draw());
 };
 
@@ -91,13 +90,13 @@ const onMouseMove = (event) => {
 };
 
 const onDbClick = (event) => {
-  let drawing = getDrawingUnderCursor(ctx);
+  let drawing = getDrawingsUnderCursor(ctx)[0];
   drawing.onDbClick();
   redraw();
 };
 
 const onClick = (event) => {
-  const clickedDrawing = getDrawingUnderCursor(ctx);
+  const clickedDrawing = getDrawingsUnderCursor(ctx)[0];
   if (!clickedDrawing) return;
 
   const automataDrawings = drawings.map(
