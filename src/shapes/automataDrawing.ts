@@ -17,4 +17,5 @@ export abstract class AutomataDrawing extends Drawing {
   }
 
   abstract drawText(text): void;
+  abstract delete(drawings: Drawing[]): Drawing[];
 }

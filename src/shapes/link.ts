@@ -20,6 +20,10 @@ export class Link extends AutomataDrawing {
     this.endY = mouseY;
   }
 
+  delete(drawings: Drawing[]): Drawing[] {
+    return drawings;
+  }
+
   draw(): Drawing {
     if (this.endState) this.setEndAnchor();
     if (this.startState) this.setStartAnchor();

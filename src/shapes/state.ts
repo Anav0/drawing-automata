@@ -1,5 +1,6 @@
 import { Drawing } from "./drawing.js";
 import { AutomataDrawing } from "./automataDrawing.js";
+import { Link } from "./Link.js";
 
 export class State extends AutomataDrawing {
   text: string;
@@ -33,6 +34,22 @@ export class State extends AutomataDrawing {
   move(mouseX: number, mouseY: number): void {
     this.x = mouseX;
     this.y = mouseY;
+  }
+
+  delete(drawings: Drawing[]): Drawing[] {
+    let links = drawings.filter((drawing) => {
+      let link = drawing as Link;
+
+      if (!link.endState) return false;
+
+      if (link.startState) {
+        return link.startState.id == this.id || link.endState.id == this.id;
+      } else {
+        return link.endState.id == this.id;
+      }
+    }) as Link[];
+
+    return drawings.filter((x) => links.indexOf(x as Link) === -1);
   }
 
   draw(): Drawing {

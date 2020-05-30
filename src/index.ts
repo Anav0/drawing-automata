@@ -123,7 +123,9 @@ const onKeyDown = (event) => {
   if (event.key.toLowerCase() == "backspace") {
     input = input.slice(0, -1);
   } else if (event.key.toLowerCase() == "delete") {
-    drawings.splice(drawings.indexOf(getHighlightedDrawing()), 1);
+    const drawing = getHighlightedDrawing();
+    drawings = drawing.delete(drawings);
+    drawings.splice(drawings.indexOf(drawing), 1);
     redraw();
   } else if (event.key.toLowerCase() == "shift") {
     isShiftPressed = true;
