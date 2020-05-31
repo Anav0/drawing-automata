@@ -67,7 +67,8 @@ const onMouseDown = (event) => {
 
   if (isShiftPressed) {
     tmpLink = new Link(ctx, mousePos.x, mousePos.y, mousePos.x, mousePos.y);
-    tmpLink.setStartState(drawingUnderCursor as State);
+    let state = drawingUnderCursor as State;
+    if (state && state.r) tmpLink.setStartState(state);
     return;
   } else if (drawingUnderCursor) {
     movingDrawing = drawingUnderCursor;
@@ -78,14 +79,12 @@ const onMouseDown = (event) => {
 
 const onMouseMove = (event) => {
   if (!isMouseDown) return;
-
   const mousePos = getMousePosOnCanvas();
-  if (tmpLink && isShiftPressed) {
-    tmpLink.move(mousePos.x, mousePos.y);
-  } else {
-    movingDrawing.move(mousePos.x, mousePos.y);
-  }
 
+  if (tmpLink && isShiftPressed) {
+    movingDrawing = tmpLink;
+  }
+  movingDrawing.move(mousePos.x, mousePos.y);
   redraw();
 };
 
@@ -138,7 +137,7 @@ const onKeyDown = (event) => {
   let hightlightedState = getHighlightedDrawing();
   if (hightlightedState) {
     clearCanvas();
-    hightlightedState.drawText(input);
+    hightlightedState.text = input;
     draw();
   }
 };
@@ -171,7 +170,6 @@ const resizeCanvas = () => {
 
 const draw = () => {
   drawings.map((drawing) => drawing.draw());
-
   if (tmpLink) tmpLink.draw();
 };
 

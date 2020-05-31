@@ -23,14 +23,6 @@ export class State extends AutomataDrawing {
     }
   }
 
-  drawText(text): void {
-    this.text = text;
-    let textWidth = this.ctx.measureText(text).width;
-    this.ctx.fillStyle = "black";
-    this.ctx.font = "bold 24px serif";
-    this.ctx.fillText(text, this.x - textWidth / 2, this.y + 6);
-  }
-
   move(mouseX: number, mouseY: number): void {
     this.x = mouseX;
     this.y = mouseY;
@@ -64,7 +56,7 @@ export class State extends AutomataDrawing {
 
     this.drawIsAccepting(this.isAccepting);
     this.drawHighlight(this.isHighlighted);
-    this.drawText(this.text);
+    this.drawText(this.text, this.x, this.y + 6);
 
     return this;
   }
