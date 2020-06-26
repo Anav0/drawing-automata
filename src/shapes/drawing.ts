@@ -1,9 +1,12 @@
+import { DrawingStyle } from "../style/drawingStyle.js";
+
 export abstract class Drawing {
   id: string;
   shape: Path2D;
   ctx: CanvasRenderingContext2D;
   x: number;
   y: number;
+  static style: DrawingStyle = new DrawingStyle();
 
   constructor(ctx, x, y) {
     this.x = x;
@@ -16,6 +19,7 @@ export abstract class Drawing {
   abstract onDbClick(): void;
   abstract move(mouseX: number, mouseY: number): void;
 }
+
 const uuidv4 = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     var r = (Math.random() * 16) | 0,

@@ -1,6 +1,7 @@
 import { Drawing } from "./drawing.js";
 import { AutomataDrawing } from "./automataDrawing.js";
 import { Link } from "./Link.js";
+import { StatesLink } from "./StatesLink.js";
 
 export class State extends AutomataDrawing {
   text: string;
@@ -17,7 +18,7 @@ export class State extends AutomataDrawing {
     this.isAccepting = isAccepting;
     if (this.isAccepting) {
       this.ctx.beginPath();
-      this.ctx.strokeStyle = "black";
+      this.ctx.strokeStyle = Drawing.style.lineColor;
       this.ctx.arc(this.x, this.y, this.r - 10, 0, 2 * Math.PI, false);
       this.ctx.stroke();
     }
@@ -34,8 +35,10 @@ export class State extends AutomataDrawing {
 
       if (!link.endState) return false;
 
-      if (link.startState) {
-        return link.startState.id == this.id || link.endState.id == this.id;
+      let casted = link as StatesLink;
+
+      if (casted.startState) {
+        return casted.startState.id == this.id || casted.endState.id == this.id;
       } else {
         return link.endState.id == this.id;
       }
@@ -47,9 +50,9 @@ export class State extends AutomataDrawing {
   draw(): Drawing {
     let circle = new Path2D();
     circle.arc(this.x, this.y, this.r, 0, Math.PI * 2, true); // Outer circle
-    this.ctx.lineWidth = 4;
-    this.ctx.fillStyle = "transparent";
-    this.ctx.strokeStyle = "black";
+    this.ctx.lineWidth = Drawing.style.lineThickness;
+    this.ctx.fillStyle = Drawing.style.stateBg;
+    this.ctx.strokeStyle = Drawing.style.lineColor;
     this.ctx.fill(circle);
     this.ctx.stroke(circle);
     this.shape = circle;

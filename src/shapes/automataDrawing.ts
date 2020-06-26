@@ -11,8 +11,11 @@ export abstract class AutomataDrawing extends Drawing {
 
   drawHighlight(isHighlighted): void {
     this.isHighlighted = isHighlighted;
-    if (this.isHighlighted) this.ctx.strokeStyle = "teal";
-    else this.ctx.strokeStyle = "black";
+    if (this.isHighlighted) {
+      this.ctx.strokeStyle = Drawing.style.highlightColor;
+    } else {
+      this.ctx.strokeStyle = Drawing.style.lineColor;
+    }
     this.ctx.stroke(this.shape);
   }
 
@@ -25,14 +28,14 @@ export abstract class AutomataDrawing extends Drawing {
   ): void {
     this.text = text;
     let textWidth = this.ctx.measureText(text).width;
-    this.ctx.fillStyle = "black";
-    this.ctx.font = "bold 24px serif";
+    this.ctx.fillStyle = Drawing.style.lineColor;
+    this.ctx.font = Drawing.style.textStyle;
 
     if (angle) {
       var cos = Math.cos(angle);
       var sin = Math.sin(angle);
-      var cornerPointX = (textWidth / 2) * (cos > 0 ? 1 : -1);
-      var cornerPointY = 20 * (sin > 0 ? 1 : -1);
+      var cornerPointX = (textWidth / 2 + 5) * (cos > 0 ? 1 : -1);
+      var cornerPointY = 15 * (sin > 0 ? 1 : -1);
       var slide =
         sin * Math.pow(Math.abs(sin), 40) * cornerPointX -
         cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
