@@ -2,6 +2,14 @@ import { State } from "./shapes/state.js";
 import { Drawing } from "./shapes/drawing.js";
 import { Link } from "./shapes/Link.js";
 import { AutomataDrawing } from "./shapes/automataDrawing.js";
+import { StatesLink } from "./shapes/StatesLink.js";
+import { SelfLink } from "./shapes/selfLink.js";
+
+import {
+  getDrawingsUnderCursor,
+  getMousePosOnCanvas,
+} from "./helpers/index.js";
+import { StartLink } from "./shapes/startLink.js";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d");
@@ -12,111 +20,69 @@ var input = "";
 var tmpLink: Link;
 var movingDrawing: Drawing;
 
-const getMousePosOnCanvas = () => {
-  let rect = canvas.getBoundingClientRect();
-  let event = window.event as any;
-  return {
-    x: ((event.clientX - rect.left) / (rect.right - rect.left)) * canvas.width,
-    y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height,
-  };
-};
-
-const getDrawingsUnderCursor = (ctx) => {
-  const mousePos = getMousePosOnCanvas();
-  let drawingUnderCursor: Drawing[] = [];
-  const { x: mouseX } = mousePos;
-  const { y: mouseY } = mousePos;
+const onMouseUp = () => {
+  isMouseDown = false;
 
   if (tmpLink) {
-    if (
-      ctx.isPointInPath(tmpLink.shape, mouseX, mouseY) ||
-      ctx.isPointInStroke(tmpLink.shape, mouseX, mouseY)
-    ) {
-      drawingUnderCursor.push(tmpLink);
-    }
-  }
-
-  for (let drawing of drawings) {
-    let isPointInPath = ctx.isPointInPath(drawing.shape, mouseX, mouseY);
-    let isPointInStroke = ctx.isPointInStroke(drawing.shape, mouseX, mouseY);
-    if (isPointInPath || isPointInStroke) {
-      drawingUnderCursor.push(drawing);
-    }
-  }
-  return drawingUnderCursor;
-};
-
-const onMouseUp = (event) => {
-  const stateUnderCursor = getDrawingsUnderCursor(ctx);
-
-  for (let underCursorDrawing of stateUnderCursor) {
-    if (tmpLink && underCursorDrawing.id !== tmpLink.id) {
-      tmpLink.setEndState(underCursorDrawing as State);
+    tmpLink.onMouseUp(getDrawingsUnderCursor(ctx, tmpLink, drawings));
+    if (tmpLink.isValid()) {
       drawings.push(tmpLink);
-      break;
+      tmpLink = null;
+      setHighlightedDrawing(drawings[drawings.length - 1]);
     }
   }
+  movingDrawing = null;
   tmpLink = null;
   redraw();
 };
 
-const onMouseDown = (event) => {
+const onMouseDown = () => {
   isMouseDown = true;
-  const drawingUnderCursor = getDrawingsUnderCursor(ctx)[0];
-  const mousePos = getMousePosOnCanvas();
+  const mousePos = getMousePosOnCanvas(canvas);
+  const drawingUnderCursor = getDrawingsUnderCursor(ctx, tmpLink, drawings)[0];
+
+  if (!drawingUnderCursor && getHighlightedDrawing()) {
+    unhighlightDrawings();
+    return;
+  }
 
   if (isShiftPressed) {
-    tmpLink = new Link(ctx, mousePos.x, mousePos.y, mousePos.x, mousePos.y);
-    tmpLink.setStartState(drawingUnderCursor as State);
+    let link;
+    if (!drawingUnderCursor) link = new StartLink(ctx, mousePos.x, mousePos.y);
+    else
+      link = new StatesLink(
+        ctx,
+        mousePos.x,
+        mousePos.y,
+        drawingUnderCursor as State
+      );
+    movingDrawing = tmpLink = link.draw();
     return;
   } else if (drawingUnderCursor) {
+    setHighlightedDrawing(drawingUnderCursor);
     movingDrawing = drawingUnderCursor;
     return;
   }
-  drawings.push(new State(ctx, mousePos.x, mousePos.y).draw());
+  let newState = new State(ctx, mousePos.x, mousePos.y).draw();
+  drawings.push(newState);
+  setHighlightedDrawing(newState);
 };
 
-const onMouseMove = (event) => {
-  if (!isMouseDown) return;
-
-  const mousePos = getMousePosOnCanvas();
+const onMouseMove = () => {
+  if (!isMouseDown || !movingDrawing) return;
+  const mousePos = getMousePosOnCanvas(canvas);
   if (tmpLink && isShiftPressed) {
-    tmpLink.move(mousePos.x, mousePos.y);
-  } else {
-    movingDrawing.move(mousePos.x, mousePos.y);
+    switchLinkVariant(mousePos);
+    movingDrawing = tmpLink;
   }
-
+  movingDrawing.move(mousePos.x, mousePos.y);
   redraw();
 };
 
-const onDbClick = (event) => {
-  let drawing = getDrawingsUnderCursor(ctx)[0];
+const onDbClick = () => {
+  let drawing = getDrawingsUnderCursor(ctx, tmpLink, drawings)[0];
   drawing.onDbClick();
   redraw();
-};
-
-const onClick = (event) => {
-  const clickedDrawing = getDrawingsUnderCursor(ctx)[0];
-  if (!clickedDrawing) return;
-
-  const automataDrawings = drawings.map(
-    (drawing) => drawing as AutomataDrawing
-  );
-  if (tmpLink) automataDrawings.push(tmpLink);
-
-  for (let automataDrawing of automataDrawings) {
-    if (automataDrawing.id === clickedDrawing.id) {
-      automataDrawing.drawHighlight(true);
-      input = automataDrawing.text;
-    } else automataDrawing.drawHighlight(false);
-  }
-};
-
-const getHighlightedDrawing = () => {
-  for (let drawing of drawings) {
-    let automataDrawing = drawing as AutomataDrawing;
-    if (automataDrawing.isHighlighted) return automataDrawing;
-  }
 };
 
 const onKeyDown = (event) => {
@@ -130,15 +96,13 @@ const onKeyDown = (event) => {
   } else if (event.key.toLowerCase() == "shift") {
     isShiftPressed = true;
   } else {
-    let letter = String.fromCharCode(event.keyCode);
-    if (!event.shiftKey) letter = letter.toLowerCase();
-    input += letter;
+    if (event.key.length === 1) input += event.key;
   }
 
   let hightlightedState = getHighlightedDrawing();
   if (hightlightedState) {
     clearCanvas();
-    hightlightedState.drawText(input);
+    hightlightedState.text = input;
     draw();
   }
 };
@@ -157,10 +121,8 @@ const onResize = () => {
 window.addEventListener("resize", onResize);
 canvas.addEventListener("mousedown", onMouseDown);
 canvas.addEventListener("mouseup", onMouseUp);
-canvas.addEventListener("mouseup", () => (isMouseDown = false));
 canvas.addEventListener("mousemove", onMouseMove);
 canvas.addEventListener("dblclick", onDbClick);
-canvas.addEventListener("click", onClick);
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 
@@ -171,7 +133,6 @@ const resizeCanvas = () => {
 
 const draw = () => {
   drawings.map((drawing) => drawing.draw());
-
   if (tmpLink) tmpLink.draw();
 };
 
@@ -182,6 +143,47 @@ const clearCanvas = () => {
 const redraw = () => {
   clearCanvas();
   draw();
+};
+
+const switchLinkVariant = (mousePos) => {
+  const drawingUnderCursor = getDrawingsUnderCursor(ctx, tmpLink, drawings)[0];
+
+  let targetDrawing = drawingUnderCursor as State;
+
+  let startDrawing;
+  if (tmpLink instanceof SelfLink) startDrawing = tmpLink.endState;
+  else if (tmpLink instanceof StatesLink) startDrawing = tmpLink.startState;
+
+  if (targetDrawing && startDrawing && targetDrawing.id == startDrawing.id) {
+    tmpLink = new SelfLink(ctx, mousePos.x, mousePos.y, targetDrawing);
+  } else if (startDrawing) {
+    tmpLink = new StatesLink(ctx, mousePos.x, mousePos.y, startDrawing);
+  }
+};
+
+const getHighlightedDrawing = () => {
+  for (let drawing of drawings) {
+    let automataDrawing = drawing as AutomataDrawing;
+    if (automataDrawing.isHighlighted) return automataDrawing;
+  }
+};
+
+const unhighlightDrawings = () => {
+  const automataDrawings = drawings.map(
+    (drawing) => drawing as AutomataDrawing
+  );
+  if (tmpLink) automataDrawings.push(tmpLink);
+
+  for (let automataDrawing of automataDrawings) {
+    automataDrawing.drawHighlight(false);
+  }
+};
+
+const setHighlightedDrawing = (drawing: Drawing) => {
+  unhighlightDrawings();
+  let casted = drawing as AutomataDrawing;
+  casted.drawHighlight(true);
+  input = casted.text;
 };
 
 resizeCanvas();

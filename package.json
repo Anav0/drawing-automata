@@ -13,14 +13,17 @@
     "Kleen",
     "DFA",
     "NFA",
-    "regex"
+    "FSM",
+    "regex",
+    "Moore",
+    "Hopcroft"
   ],
   "scripts": {
     "start": "run-s watch",
     "build": "run-s build:*",
-    "serve": "browser-sync start -s \"bin\" -f \"bin\"",
-    "build:assets": "copyfiles -u 1 \"src/**/*.js\" \"src/**/*.css\" \"src/**/*.html\" \"src/**/*.{png,jpg,gif}\" bin",
-    "build:scss": "node-sass --output-style compressed -r src -o bin",
+    "serve": "browser-sync start -s \"build\" -f \"build\"",
+    "build:assets": "copyfiles -u 1 \"src/**/*.js\" \"src/**/*.css\" \"src/**/*.html\" \"src/**/*.{png,jpg,gif}\" build",
+    "build:scss": "node-sass --output-style compressed -r src -o build",
     "build:tsc": "tsc",
     "watch:tsc": "tsc -w",
     "watch:scss": "onchange \"src/**/*.scss\" -- run-s build:scss",
