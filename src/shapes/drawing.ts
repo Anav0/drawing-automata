@@ -6,6 +6,7 @@ export abstract class Drawing {
   ctx: CanvasRenderingContext2D;
   x: number;
   y: number;
+
   static style: DrawingStyle = new DrawingStyle();
 
   constructor(ctx, x, y) {

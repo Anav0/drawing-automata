@@ -2,14 +2,27 @@ import { Drawing } from "./drawing.js";
 import { AutomataDrawing } from "./automataDrawing.js";
 import { Link } from "./Link.js";
 import { StatesLink } from "./StatesLink.js";
+import { serializable } from "../helpers/serializable.js";
+import { SelfLink } from "./selfLink.js";
+import { StartLink } from "./startLink.js";
 
+@serializable
 export class State extends AutomataDrawing {
   text: string;
   r: number;
   isAccepting: boolean = false;
+  readonly className: string = "State";
 
-  constructor(ctx, x, y, r = 50, text = "") {
+  constructor(
+    ctx?: CanvasRenderingContext2D,
+    x?: number,
+    y?: number,
+    r?: number,
+    text?: string
+  ) {
     super(ctx, x, y);
+    if (!r) r = 50;
+    if (!text) text = "";
     this.text = text;
     this.r = r;
   }
@@ -21,6 +34,23 @@ export class State extends AutomataDrawing {
       this.ctx.strokeStyle = Drawing.style.lineColor;
       this.ctx.arc(this.x, this.y, this.r - 10, 0, 2 * Math.PI, false);
       this.ctx.stroke();
+    }
+  }
+
+  //TODO: find way to avoid this mess...
+  onRetrive(allRetrivedDrawings: Drawing[]) {
+    for (let drawing of allRetrivedDrawings) {
+      if (drawing instanceof StatesLink) {
+        let casted = drawing as StatesLink;
+        if (casted.endState.id === this.id) casted.endState = this;
+        if (casted.startState.id === this.id) casted.startState = this;
+      } else if (drawing instanceof SelfLink) {
+        let casted = drawing as SelfLink;
+        if (casted.endState.id === this.id) casted.endState = this;
+      } else if (drawing instanceof StartLink) {
+        let casted = drawing as StartLink;
+        if (casted.endState.id === this.id) casted.endState = this;
+      }
     }
   }
 
