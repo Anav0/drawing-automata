@@ -10,15 +10,17 @@ import {
   getMousePosOnCanvas,
 } from "./helpers/index.js";
 import { StartLink } from "./shapes/startLink.js";
+import { LocalStorage, DrawingsStorage } from "./helpers/storage.js";
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d");
+var canvas: HTMLCanvasElement;
+var ctx: CanvasRenderingContext2D;
 var isMouseDown = false;
 var isShiftPressed = false;
 var drawings: Drawing[] = [];
 var input = "";
 var tmpLink: Link;
 var movingDrawing: Drawing;
+var storage: DrawingsStorage;
 
 const onMouseUp = () => {
   isMouseDown = false;
@@ -118,13 +120,27 @@ const onResize = () => {
   redraw();
 };
 
-window.addEventListener("resize", onResize);
-canvas.addEventListener("mousedown", onMouseDown);
-canvas.addEventListener("mouseup", onMouseUp);
-canvas.addEventListener("mousemove", onMouseMove);
-canvas.addEventListener("dblclick", onDbClick);
+const onLoad = () => {
+  canvas = document.getElementById("canvas") as HTMLCanvasElement;
+  ctx = canvas.getContext("2d");
+  ctx.fillStyle = "black";
+  ctx.strokeStyle = "black";
+  storage = new LocalStorage(ctx, "drawings");
+  drawings = storage.retrive();
+
+  canvas.addEventListener("mousedown", onMouseDown);
+  canvas.addEventListener("mouseup", onMouseUp);
+  canvas.addEventListener("mousemove", onMouseMove);
+  canvas.addEventListener("dblclick", onDbClick);
+
+  resizeCanvas();
+  draw();
+};
+
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
+window.addEventListener("resize", onResize);
+window.addEventListener("load", onLoad);
 
 const resizeCanvas = () => {
   canvas.width = window.innerWidth - 150;
@@ -134,6 +150,8 @@ const resizeCanvas = () => {
 const draw = () => {
   drawings.map((drawing) => drawing.draw());
   if (tmpLink) tmpLink.draw();
+
+  storage.store(drawings);
 };
 
 const clearCanvas = () => {
@@ -185,6 +203,3 @@ const setHighlightedDrawing = (drawing: Drawing) => {
   casted.drawHighlight(true);
   input = casted.text;
 };
-
-resizeCanvas();
-draw();

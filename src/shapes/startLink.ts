@@ -1,7 +1,9 @@
 import { Drawing } from "./drawing.js";
 import { Link } from "./Link.js";
 import { State } from "./state.js";
+import { serializable } from "../helpers/serializable.js";
 
+@serializable
 export class StartLink extends Link {
   anchorAngle: number = 0;
   mouseOffsetAngle: number = 0;
@@ -10,8 +12,9 @@ export class StartLink extends Link {
   lineAngleAdjust: number = 0;
   scaleModifier = 1;
   prevMouseY = 0;
+  readonly className: string = "StartLink";
 
-  constructor(ctx, x, y) {
+  constructor(ctx?: CanvasRenderingContext2D, x?: number, y?: number) {
     super(ctx, x, y);
     this.text = "START";
   }

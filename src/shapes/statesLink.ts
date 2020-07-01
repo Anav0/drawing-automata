@@ -1,8 +1,9 @@
 import { Drawing } from "./drawing.js";
 import { Link } from "./Link.js";
 import { State } from "./state.js";
-import { getDrawingsUnderCursor } from "../helpers/index.js";
+import { serializable } from "../helpers/serializable.js";
 
+@serializable
 export class StatesLink extends Link {
   startState: State;
   anchorAngle: number = 0;
@@ -11,8 +12,14 @@ export class StatesLink extends Link {
   perpendicularPart: number = 0;
   scaleModifier = 1;
   prevMouseY = 0;
+  readonly className: string = "StatesLink";
 
-  constructor(ctx, x, y, startState: State) {
+  constructor(
+    ctx?: CanvasRenderingContext2D,
+    x?: number,
+    y?: number,
+    startState?: State
+  ) {
     super(ctx, x, y);
     this.startState = startState;
   }

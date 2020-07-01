@@ -1,11 +1,19 @@
 import { Drawing } from "./drawing.js";
 import { Link } from "./link.js";
 import { State } from "./state.js";
+import { serializable } from "../helpers/serializable.js";
 
+@serializable
 export class SelfLink extends Link {
   anchorAngle: number = 0;
+  readonly className: string = "SelfLink";
 
-  constructor(ctx, x, y, endState: State) {
+  constructor(
+    ctx?: CanvasRenderingContext2D,
+    x?: number,
+    y?: number,
+    endState?: State
+  ) {
     super(ctx, x, y);
     this.endState = endState;
   }
