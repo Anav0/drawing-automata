@@ -1,8 +1,6 @@
 import { Drawing } from "../shapes/drawing.js";
 import { Link } from "../shapes/link.js";
 import { State } from "../shapes/state.js";
-import { SelfLink } from "../shapes/selfLink.js";
-import { StatesLink } from "../shapes/statesLink.js";
 
 export const getMousePosOnCanvas = (canvas: HTMLCanvasElement) => {
   let rect = canvas.getBoundingClientRect();
@@ -41,4 +39,19 @@ export const getDrawingsUnderCursor = (
     }
   }
   return drawingsUnderCursor;
+};
+
+export const snapState = (state: State, drawings: Drawing[]) => {
+  for (let drawing of drawings) {
+    if (drawing.id == state.id) continue;
+    if (drawing instanceof State) {
+      if (Math.abs(state.x - drawing.x) < Drawing.style.snap) {
+        state.x = drawing.x;
+      }
+
+      if (Math.abs(state.y - drawing.y) < Drawing.style.snap) {
+        state.y = drawing.y;
+      }
+    }
+  }
 };
