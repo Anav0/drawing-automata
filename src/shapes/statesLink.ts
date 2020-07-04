@@ -2,6 +2,7 @@ import { Drawing } from "./drawing.js";
 import { Link } from "./Link.js";
 import { State } from "./state.js";
 import { serializable } from "../helpers/serializable.js";
+import { getMousePosOnCanvas } from "../helpers/index.js";
 
 @serializable
 export class StatesLink extends Link {
@@ -10,8 +11,8 @@ export class StatesLink extends Link {
   mouseOffsetAngle: number = 0;
   parallelPart: number = 0.5;
   perpendicularPart: number = 0;
-  scaleModifier = 1;
   prevMouseY = 0;
+  lineAngleAdjust = 0;
   readonly className: string = "StatesLink";
 
   constructor(
@@ -38,18 +39,9 @@ export class StatesLink extends Link {
   }
 
   move(mouseX: number, mouseY: number): void {
-    let isGoingUp = this.prevMouseY > mouseY;
-    let marginValue = 1;
-    let incrementBy = 0.035;
-
-    if (isGoingUp && this.scaleModifier < marginValue)
-      this.scaleModifier += incrementBy;
-    else if (!isGoingUp && this.scaleModifier > -marginValue)
-      this.scaleModifier -= incrementBy;
-
-    this.prevMouseY = mouseY;
     this.endX = mouseX;
     this.endY = mouseY;
+    if (this.endState) this.setAnchorPoint();
   }
 
   delete(drawings: Drawing[]): Drawing[] {
@@ -79,33 +71,56 @@ export class StatesLink extends Link {
   drawBend(): Path2D {
     this.ctx.beginPath();
     let line = new Path2D();
-    this.setAnchorPoint();
-    let stuff = this.getEndPointsAndCircle();
-    line.arc(
-      stuff.circleX,
-      stuff.circleY,
-      stuff.circleRadius,
-      stuff.startAngle,
-      stuff.endAngle,
-      stuff.isReversed
-    );
     this.shape = line;
-
-    this.drawArrow(
-      stuff.endX,
-      stuff.endY,
-      stuff.endAngle - stuff.reverseScale * (Math.PI / 2)
-    );
-    let ddd = stuff.isReversed ? 1 : 0;
-    var startAngle = stuff.startAngle;
-    var endAngle = stuff.endAngle;
-    if (endAngle < startAngle) {
-      endAngle += Math.PI * 2;
+    let stuff = this.getEndPointsAndCircle();
+    if (stuff.hasCircle) {
+      line.arc(
+        stuff.circleX,
+        stuff.circleY,
+        stuff.circleRadius,
+        stuff.startAngle,
+        stuff.endAngle,
+        stuff.isReversed
+      );
+      this.drawArrow(
+        stuff.endX,
+        stuff.endY,
+        stuff.endAngle - stuff.reverseScale * (Math.PI / 2)
+      );
+      var startAngle = stuff.startAngle;
+      var endAngle = stuff.endAngle;
+      if (endAngle < startAngle) {
+        endAngle += Math.PI * 2;
+      }
+      let isReversed = stuff.isReversed ? 1 : 0;
+      var textAngle = (startAngle + endAngle) / 2 + isReversed * Math.PI;
+      var textX = stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
+      var textY = stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
+      this.drawText(this.text, textX, textY + 5, textAngle, true);
+    } else {
+      line.moveTo(stuff.startX, stuff.startY);
+      line.lineTo(stuff.endX, stuff.endY);
+      this.drawArrow(
+        stuff.endX,
+        stuff.endY,
+        Math.atan2(stuff.endY - stuff.startY, stuff.endX - stuff.startX)
+      );
+      var textX = (stuff.startX + stuff.endX) / 2;
+      var textY = (stuff.startY + stuff.endY) / 2;
+      var textAngle = Math.atan2(
+        stuff.endX - stuff.startX,
+        stuff.startY - stuff.endY
+      );
+      this.drawText(
+        this.text,
+        textX,
+        textY,
+        textAngle + this.lineAngleAdjust,
+        true
+      );
     }
-    let textAngle = (startAngle + endAngle) / 2 + ddd * Math.PI;
-    let textX = stuff.circleX + stuff.circleRadius * Math.cos(textAngle);
-    let textY = stuff.circleY + stuff.circleRadius * Math.sin(textAngle);
-    this.drawText(this.text, textX, textY, textAngle, true);
+
+    this.shape = line;
 
     this.ctx.stroke(this.shape);
     return line;
@@ -184,18 +199,26 @@ export class StatesLink extends Link {
   }
 
   setAnchorPoint() {
+    let mousePos = getMousePosOnCanvas(this.ctx.canvas);
+    let x = mousePos.x;
+    let y = mousePos.y;
     let diffX = this.endState.x - this.startState.x;
     let diffY = this.endState.y - this.startState.y;
     let scale = Math.sqrt(diffX * diffX + diffY * diffY);
-    scale = scale * this.scaleModifier;
     this.parallelPart =
-      (diffX * (this.x - this.startState.x) +
-        diffY * (this.y - this.startState.y)) /
+      (diffX * (x - this.startState.x) + diffY * (y - this.startState.y)) /
       (scale * scale);
     this.perpendicularPart =
-      (diffX * (diffY - this.startState.y) -
-        diffY * (this.x - this.startState.x)) /
+      (diffX * (y - this.startState.y) - diffY * (x - this.startState.x)) /
       scale;
+    if (
+      this.parallelPart > 0 &&
+      this.parallelPart < 1 &&
+      Math.abs(this.perpendicularPart) < Drawing.style.snap
+    ) {
+      this.lineAngleAdjust = (this.perpendicularPart < 0 ? 1 : 0) * Math.PI;
+      this.perpendicularPart = 0;
+    }
   }
 
   getAnchorPoint() {

@@ -8,6 +8,7 @@ import { SelfLink } from "./shapes/selfLink.js";
 import {
   getDrawingsUnderCursor,
   getMousePosOnCanvas,
+  snapState,
 } from "./helpers/index.js";
 import { StartLink } from "./shapes/startLink.js";
 import { LocalStorage, DrawingsStorage } from "./helpers/storage.js";
@@ -78,6 +79,8 @@ const onMouseMove = () => {
     movingDrawing = tmpLink;
   }
   movingDrawing.move(mousePos.x, mousePos.y);
+  if (movingDrawing instanceof State)
+    snapState(movingDrawing as State, drawings);
   redraw();
 };
 

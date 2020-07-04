@@ -31,7 +31,7 @@ export abstract class AutomataDrawing extends Drawing {
     this.ctx.fillStyle = Drawing.style.lineColor;
     this.ctx.font = Drawing.style.textStyle;
 
-    if (angle) {
+    if (angle != null) {
       var cos = Math.cos(angle);
       var sin = Math.sin(angle);
       var cornerPointX = (textWidth / 2 + 5) * (cos > 0 ? 1 : -1);
