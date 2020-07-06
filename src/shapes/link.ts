@@ -11,7 +11,7 @@ export abstract class Link extends AutomataDrawing {
     super(ctx, x, y);
   }
 
-  abstract isValid(): boolean;
+  abstract isValid(allDrawings: Drawing[]): boolean;
   abstract onMouseUp(drawingsUnderCursor: Drawing[]): void;
 
   delete(drawings: Drawing[]): Drawing[] {

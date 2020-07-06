@@ -25,9 +25,20 @@ export class StatesLink extends Link {
     this.startState = startState;
   }
 
-  isValid(): boolean {
+  isValid(allDrawings: Drawing[]): boolean {
     if (!this.startState || !this.endState) return false;
-    return this.startState.id && this.endState.id ? true : false;
+
+    for (let drawing of allDrawings) {
+      if (drawing instanceof StatesLink) {
+        let casted = drawing as StatesLink;
+        if (
+          casted.startState.id == this.startState.id &&
+          casted.endState.id == this.endState.id
+        )
+          return false;
+      }
+    }
+    return true;
   }
 
   onMouseUp(drawingsUnderCursor: Drawing[]): void {

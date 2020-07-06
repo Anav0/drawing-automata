@@ -29,7 +29,7 @@ const onMouseUp = () => {
 
   if (tmpLink) {
     tmpLink.onMouseUp(getDrawingsUnderCursor(ctx, tmpLink, drawings));
-    if (tmpLink.isValid()) {
+    if (tmpLink.isValid(drawings)) {
       drawings.push(tmpLink);
       tmpLink = null;
       setHighlightedDrawing(drawings[drawings.length - 1]);

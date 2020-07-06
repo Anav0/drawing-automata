@@ -14,8 +14,11 @@ export class StartLink extends Link {
     this.text = "START";
   }
 
-  isValid(): boolean {
-    return this.endState ? true : false;
+  isValid(allDrawings: Drawing[]): boolean {
+    for (let drawing of allDrawings) {
+      if (drawing instanceof StartLink) return false;
+    }
+    return true;
   }
 
   onMouseUp(drawingsUnderCursor: Drawing[]): void {
