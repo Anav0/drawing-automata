@@ -227,7 +227,7 @@ export class StatesLink extends Link {
       this.parallelPart < 1 &&
       Math.abs(this.perpendicularPart) < Drawing.style.snap
     ) {
-      this.lineAngleAdjust = (this.perpendicularPart < 0 ? 1 : 0) * Math.PI;
+      this.lineAngleAdjust = Math.PI;
       this.perpendicularPart = 0;
     }
   }

@@ -25,7 +25,7 @@ export class LocalStorage implements DrawingsStorage {
 
   retrive(): Drawing[] {
     let stringFormat = localStorage.getItem(this.storageName);
-    if (!stringFormat) return [];
+    if (!stringFormat || stringFormat.length === 0) return [];
     let drawings = JSON.parse(stringFormat, reviver) as Drawing[];
     //TODO: This is neccessary to restablish references between states and links
     for (let d of drawings) {

@@ -35,7 +35,7 @@ export abstract class AutomataDrawing extends Drawing {
       var cos = Math.cos(angle);
       var sin = Math.sin(angle);
       var cornerPointX = (textWidth / 2 + 5) * (cos > 0 ? 1 : -1);
-      var cornerPointY = 15 * (sin > 0 ? 1 : -1);
+      var cornerPointY = 20 * (sin > 0 ? 1 : -1);
       var slide =
         sin * Math.pow(Math.abs(sin), 40) * cornerPointX -
         cos * Math.pow(Math.abs(cos), 10) * cornerPointY;
