@@ -8,6 +8,7 @@ import { SelfLink } from "./shapes/selfLink.js";
 import {
   getDrawingsUnderCursor,
   getMousePosOnCanvas,
+  snapState,
 } from "./helpers/index.js";
 import { StartLink } from "./shapes/startLink.js";
 import { LocalStorage, DrawingsStorage } from "./helpers/storage.js";
@@ -21,13 +22,14 @@ var input = "";
 var tmpLink: Link;
 var movingDrawing: Drawing;
 var storage: DrawingsStorage;
+var isStartStatePresent: boolean;
 
 const onMouseUp = () => {
   isMouseDown = false;
 
   if (tmpLink) {
     tmpLink.onMouseUp(getDrawingsUnderCursor(ctx, tmpLink, drawings));
-    if (tmpLink.isValid()) {
+    if (tmpLink.isValid(drawings)) {
       drawings.push(tmpLink);
       tmpLink = null;
       setHighlightedDrawing(drawings[drawings.length - 1]);
@@ -50,8 +52,10 @@ const onMouseDown = () => {
 
   if (isShiftPressed) {
     let link;
-    if (!drawingUnderCursor) link = new StartLink(ctx, mousePos.x, mousePos.y);
-    else
+    if (!drawingUnderCursor && !isStartStatePresent) {
+      link = new StartLink(ctx, mousePos.x, mousePos.y);
+      isStartStatePresent = true;
+    } else
       link = new StatesLink(
         ctx,
         mousePos.x,
@@ -78,6 +82,8 @@ const onMouseMove = () => {
     movingDrawing = tmpLink;
   }
   movingDrawing.move(mousePos.x, mousePos.y);
+  if (movingDrawing instanceof State)
+    snapState(movingDrawing as State, drawings);
   redraw();
 };
 
@@ -94,6 +100,7 @@ const onKeyDown = (event) => {
     const drawing = getHighlightedDrawing();
     drawings = drawing.delete(drawings);
     drawings.splice(drawings.indexOf(drawing), 1);
+    determinStartStatePresence();
     redraw();
   } else if (event.key.toLowerCase() == "shift") {
     isShiftPressed = true;
@@ -128,6 +135,8 @@ const onLoad = () => {
   storage = new LocalStorage(ctx, "drawings");
   drawings = storage.retrive();
 
+  determinStartStatePresence();
+
   canvas.addEventListener("mousedown", onMouseDown);
   canvas.addEventListener("mouseup", onMouseUp);
   canvas.addEventListener("mousemove", onMouseMove);
@@ -141,6 +150,16 @@ window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 window.addEventListener("resize", onResize);
 window.addEventListener("load", onLoad);
+
+const determinStartStatePresence = () => {
+  isStartStatePresent = false;
+  for (let drawing of drawings) {
+    if (drawing instanceof StartLink) {
+      isStartStatePresent = true;
+      return;
+    }
+  }
+};
 
 const resizeCanvas = () => {
   canvas.width = window.innerWidth - 150;

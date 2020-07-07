@@ -37,9 +37,14 @@ export class SelfLink extends Link {
     if (this.anchorAngle > Math.PI) this.anchorAngle -= 2 * Math.PI;
   }
 
-  isValid(): boolean {
-    if (!this.endState) return false;
-    return this.endState.id ? true : false;
+  isValid(allDrawings: Drawing[]): boolean {
+    for (let drawing of allDrawings) {
+      if (drawing instanceof SelfLink) {
+        let casted = drawing as SelfLink;
+        if (casted.endState.id == this.endState.id) return false;
+      }
+    }
+    return true;
   }
 
   onMouseUp(drawingsUnderCursor: Drawing[]): void {
