@@ -1,17 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=UA-134709304-4"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "UA-134709304-4");
+    </script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Draw finite state automata with ease" />
+    <meta
+      name="keywords"
+      content="FSM automata drawing canvas hopcroft moore minimalization"
+    />
     <title>Drawing Automata</title>
     <link rel="stylesheet" href="style/index.css" />
   </head>
   <body>
     <h1>Drawing Automata</h1>
     <canvas id="canvas"></canvas>
-    <div class="btns">
+    <!-- <div class="btns">
       <button>Save</button>
       <button>Minimize</button>
+    </div> -->
+    <div class="instructions">
+      <span class="instruction-highlight">Left click</span>
+      <p>
+        To place new state or highlight exiting element. When element is
+        highlighted you can edit its text.
+      </p>
+      <span class="instruction-highlight">Left click and hold</span>
+      <p>To move state or change arrow anchor point.</p>
+      <span class="instruction-highlight">Double left click</span>
+      <p>To mark state as accepting or change arrow direction.</p>
     </div>
     <script type="module" src="index.js"></script>
   </body>

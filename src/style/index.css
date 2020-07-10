@@ -42,3 +42,16 @@ button:hover {
   transform: translateY(-10%);
   box-shadow: 8px 8px 0px black;
 }
+
+.instructions {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  margin: 2rem;
+}
+.instructions * {
+  place-self: center start;
+}
+.instruction-highlight {
+  color: pink;
+  font-weight: bold;
+}
