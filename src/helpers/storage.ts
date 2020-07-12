@@ -1,7 +1,5 @@
 import { Drawing } from "../shapes/drawing.js";
 import { registry } from "./serializable.js";
-import { Link } from "../shapes/Link.js";
-import { StatesLink } from "../shapes/StatesLink.js";
 import { State } from "../shapes/state.js";
 
 export interface DrawingsStorage {

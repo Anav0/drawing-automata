@@ -12,6 +12,9 @@ import {
 } from "./helpers/index.js";
 import { StartLink } from "./shapes/startLink.js";
 import { LocalStorage, DrawingsStorage } from "./helpers/storage.js";
+import { Automata } from "./helpers/automata.js";
+import { api } from "./api/index.js";
+import { MinimizationType } from "./helpers/minimalizationType.js";
 
 var canvas: HTMLCanvasElement;
 var ctx: CanvasRenderingContext2D;
@@ -23,6 +26,8 @@ var tmpLink: Link;
 var movingDrawing: Drawing;
 var storage: DrawingsStorage;
 var isStartStatePresent: boolean;
+var automata: Automata;
+var minimalizationType = MinimizationType.Moore;
 
 const onMouseUp = () => {
   isMouseDown = false;
@@ -129,6 +134,10 @@ const onResize = () => {
 
 const onLoad = () => {
   canvas = document.getElementById("canvas") as HTMLCanvasElement;
+  document.getElementById("minimizeBtn").addEventListener("click", minimize);
+  document
+    .getElementById("minimalizationTypeSelector")
+    .addEventListener("change", minimalizationTypeChanged);
   ctx = canvas.getContext("2d");
   ctx.fillStyle = "black";
   ctx.strokeStyle = "black";
@@ -151,6 +160,10 @@ window.addEventListener("keyup", onKeyUp);
 window.addEventListener("resize", onResize);
 window.addEventListener("load", onLoad);
 
+const minimalizationTypeChanged = (event) => {
+  minimalizationType = MinimizationType[MinimizationType[event.target.value]];
+};
+
 const determinStartStatePresence = () => {
   isStartStatePresent = false;
   for (let drawing of drawings) {
@@ -162,15 +175,15 @@ const determinStartStatePresence = () => {
 };
 
 const resizeCanvas = () => {
-  canvas.width = window.innerWidth - 150;
-  canvas.height = window.innerHeight - 200;
+  canvas.width = window.innerWidth - 250;
+  canvas.height = window.innerHeight - 400;
 };
 
 const draw = () => {
   drawings.map((drawing) => drawing.draw());
   if (tmpLink) tmpLink.draw();
 
-  storage.store(drawings);
+  //storage.store(drawings);
 };
 
 const clearCanvas = () => {
@@ -222,3 +235,128 @@ const setHighlightedDrawing = (drawing: Drawing) => {
   casted.drawHighlight(true);
   input = casted.text;
 };
+
+const drawAutomata = (automata: Automata) => {
+  const objectFlip = (obj) => {
+    const ret = {};
+    Object.keys(obj).forEach((key) => {
+      ret[obj[key]] = key;
+    });
+    return ret;
+  };
+
+  const createOrRetriveState = (stateIndex) => {
+    let state;
+    if (drawnStates[stateIndex] !== undefined) state = drawnStates[stateIndex];
+    else {
+      state = new State(
+        ctx,
+        baseX,
+        baseY,
+        Drawing.style.r,
+        flipedStatesLookup[stateIndex]
+      );
+      drawings.push(state);
+      drawnStates[stateIndex] = state;
+    }
+
+    return state;
+  };
+
+  drawings = [];
+
+  let drawnStates = {};
+
+  let midY = canvas.height / 2;
+  let baseX = 300;
+  let baseY = 100;
+  let flipedStatesLookup = objectFlip(automata.statesLookup);
+  let flipedSymbolsLookup = objectFlip(automata.symbolsLookup);
+  let drawFromQueque = [];
+  for (let key in flipedStatesLookup) {
+    drawFromQueque.push(key);
+  }
+  drawFromQueque.splice(automata.startingState, 1);
+  drawFromQueque.push(automata.startingState);
+
+  // Draw start state and its arrow
+  let startState = new State(
+    ctx,
+    baseX,
+    baseY,
+    Drawing.style.r,
+    flipedStatesLookup[automata.startingState]
+  );
+  baseX -= 150;
+  drawnStates[automata.startingState] = startState;
+
+  let startLink = new StartLink(ctx, baseX, baseY);
+  baseX += 300;
+  startLink.endState = startState;
+  drawings.push(startState, startLink);
+  baseX += 50;
+
+  //Draw the rest of states
+  while (drawFromQueque.length > 0) {
+    let stateToDrawnFrom = drawFromQueque.pop();
+    let statesToDraw = automata.transitions[stateToDrawnFrom];
+    let symbolIndex = 0;
+    let prevLink: Link;
+    let prevStateIndex;
+
+    for (let stateIndex of statesToDraw) {
+      let state = createOrRetriveState(stateIndex);
+      let drawnFromState = createOrRetriveState(stateToDrawnFrom);
+
+      //Check if its selflink
+      if (stateIndex == stateToDrawnFrom) {
+        let selfLink;
+        if (prevLink && prevLink.endState.id == state.id) selfLink = prevLink;
+        else {
+          selfLink = new SelfLink(ctx, baseX, baseY, state);
+          drawings.push(selfLink);
+        }
+        selfLink.text += flipedSymbolsLookup[symbolIndex];
+        prevLink = selfLink;
+      } else {
+        // check if prev link is for the same state
+        if (prevLink && prevLink.endState.id === state.id) {
+          prevLink.text += flipedSymbolsLookup[symbolIndex];
+        } else {
+          let link = new StatesLink(ctx, baseX, midY, drawnFromState);
+          link.endState = state;
+          link.text = flipedSymbolsLookup[symbolIndex];
+          drawings.push(link);
+          prevLink = link;
+
+          baseX += 200;
+        }
+      }
+
+      if (baseX > canvas.width) {
+        baseX = 100;
+        baseY += 100;
+      }
+
+      symbolIndex++;
+      prevStateIndex = stateIndex;
+    }
+  }
+  console.log(drawings);
+  redraw();
+};
+
+async function minimize() {
+  try {
+    automata = new Automata(drawings);
+
+    const response = await api.minimize(minimalizationType, automata);
+    let minimizaedAutomata = response as Automata;
+    console.log(minimizaedAutomata);
+    drawAutomata(minimizaedAutomata);
+  } catch (error) {
+    console.log(error);
+    alert(error.message);
+  }
+  //TODO: Check if automata is valid
+}

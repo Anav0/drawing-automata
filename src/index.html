@@ -24,15 +24,22 @@
       content="FSM automata drawing canvas hopcroft moore minimalization"
     />
     <title>Drawing Automata</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style/index.css" />
   </head>
   <body>
     <h1>Drawing Automata</h1>
     <canvas id="canvas"></canvas>
-    <!-- <div class="btns">
-      <button>Save</button>
-      <button>Minimize</button>
-    </div> -->
+    <div class="btns">
+      <select id="minimalizationTypeSelector">
+        <option value="0">Moore</option>
+        <option value="1">Hopcroft</option>
+      </select>
+      <button id="minimizeBtn">Minimize</button>
+    </div>
     <div class="instructions">
       <span class="instruction-highlight">Left click</span>
       <p>
