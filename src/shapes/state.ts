@@ -27,6 +27,13 @@ export class State extends AutomataDrawing {
     this.r = r;
   }
 
+  containsPoint(x: number, y: number): boolean {
+    return (
+      (x - this.x) * (x - this.x) + (y - this.y) * (y - this.y) <
+      this.r * this.r
+    );
+  }
+
   drawIsAccepting(isAccepting): void {
     this.isAccepting = isAccepting;
     if (this.isAccepting) {

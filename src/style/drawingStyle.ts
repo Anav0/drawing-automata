@@ -6,6 +6,7 @@ export class DrawingStyle {
   textStyle: string = "bold 24px serif";
   arrowHeadSize: number = 20;
   snap: number = 10;
+  selectPadding: number = 10;
   r: number = 50;
 }
 

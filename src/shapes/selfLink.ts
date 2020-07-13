@@ -18,6 +18,40 @@ export class SelfLink extends Link {
     this.endState = endState;
   }
 
+  containsPoint(x: number, y: number): boolean {
+    var stuff = this.getEndPointsAndCircle();
+    var dx = x - stuff.circleX;
+    var dy = y - stuff.circleY;
+    var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
+    return Math.abs(distance) < Drawing.style.selectPadding;
+  }
+
+  getEndPointsAndCircle() {
+    var circleX =
+      this.endState.x + 1.5 * this.endState.r * Math.cos(this.anchorAngle);
+    var circleY =
+      this.endState.y + 1.5 * this.endState.r * Math.sin(this.anchorAngle);
+    var circleRadius = 0.75 * this.endState.r;
+    var startAngle = this.anchorAngle - Math.PI * 0.8;
+    var endAngle = this.anchorAngle + Math.PI * 0.8;
+    var startX = circleX + circleRadius * Math.cos(startAngle);
+    var startY = circleY + circleRadius * Math.sin(startAngle);
+    var endX = circleX + circleRadius * Math.cos(endAngle);
+    var endY = circleY + circleRadius * Math.sin(endAngle);
+    return {
+      hasCircle: true,
+      startX: startX,
+      startY: startY,
+      endX: endX,
+      endY: endY,
+      startAngle: startAngle,
+      endAngle: endAngle,
+      circleX: circleX,
+      circleY: circleY,
+      circleRadius: circleRadius,
+    };
+  }
+
   move(mouseX: number, mouseY: number): void {
     this.x = mouseX;
     this.y = mouseY;

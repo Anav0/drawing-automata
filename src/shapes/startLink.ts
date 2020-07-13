@@ -21,6 +21,21 @@ export class StartLink extends Link {
     return true;
   }
 
+  containsPoint(x: number, y: number): boolean {
+    var stuff = this.getEndPoints();
+    var dx = stuff.endX - stuff.startX;
+    var dy = stuff.endY - stuff.startY;
+    var length = Math.sqrt(dx * dx + dy * dy);
+    var percent =
+      (dx * (x - stuff.startX) + dy * (y - stuff.startY)) / (length * length);
+    var distance = (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
+    return (
+      percent > 0 &&
+      percent < 1 &&
+      Math.abs(distance) < Drawing.style.selectPadding
+    );
+  }
+
   onMouseUp(drawingsUnderCursor: Drawing[]): void {
     for (let drawing of drawingsUnderCursor) {
       if (!(drawing instanceof State)) continue;

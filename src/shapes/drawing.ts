@@ -19,6 +19,7 @@ export abstract class Drawing {
   abstract draw(): Drawing;
   abstract onDbClick(): void;
   abstract move(mouseX: number, mouseY: number): void;
+  abstract containsPoint(x: number, y: number): boolean;
 }
 
 const uuidv4 = () => {

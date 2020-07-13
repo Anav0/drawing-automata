@@ -23,18 +23,13 @@ export const getDrawingsUnderCursor = (
   const { y: mouseY } = mousePos;
 
   if (tmpLink) {
-    if (
-      ctx.isPointInPath(tmpLink.shape, mouseX, mouseY) ||
-      ctx.isPointInStroke(tmpLink.shape, mouseX, mouseY)
-    ) {
+    if (tmpLink.containsPoint(mouseX, mouseY)) {
       drawingsUnderCursor.push(tmpLink);
     }
   }
 
   for (let drawing of drawings) {
-    let isPointInPath = ctx.isPointInPath(drawing.shape, mouseX, mouseY);
-    let isPointInStroke = ctx.isPointInStroke(drawing.shape, mouseX, mouseY);
-    if (isPointInPath || isPointInStroke) {
+    if (drawing.containsPoint(mouseX, mouseY)) {
       drawingsUnderCursor.push(drawing);
     }
   }

@@ -25,6 +25,46 @@ export class StatesLink extends Link {
     this.startState = startState;
   }
 
+  containsPoint(x: number, y: number): boolean {
+    var stuff = this.getEndPointsAndCircle();
+    if (stuff.hasCircle) {
+      var dx = x - stuff.circleX;
+      var dy = y - stuff.circleY;
+      var distance = Math.sqrt(dx * dx + dy * dy) - stuff.circleRadius;
+      if (Math.abs(distance) < Drawing.style.selectPadding) {
+        var angle = Math.atan2(dy, dx);
+        var startAngle = stuff.startAngle;
+        var endAngle = stuff.endAngle;
+        if (stuff.isReversed) {
+          var temp = startAngle;
+          startAngle = endAngle;
+          endAngle = temp;
+        }
+        if (endAngle < startAngle) {
+          endAngle += Math.PI * 2;
+        }
+        if (angle < startAngle) {
+          angle += Math.PI * 2;
+        } else if (angle > endAngle) {
+          angle -= Math.PI * 2;
+        }
+        return angle > startAngle && angle < endAngle;
+      }
+    } else {
+      var dx = stuff.endX - stuff.startX;
+      var dy = stuff.endY - stuff.startY;
+      var length = Math.sqrt(dx * dx + dy * dy);
+      var percent =
+        (dx * (x - stuff.startX) + dy * (y - stuff.startY)) / (length * length);
+      var distance =
+        (dx * (y - stuff.startY) - dy * (x - stuff.startX)) / length;
+      return (
+        percent > 0 && percent < 1 && Math.abs(distance) < Drawing.style.snap
+      );
+    }
+    return false;
+  }
+
   isValid(allDrawings: Drawing[]): boolean {
     if (!this.startState || !this.endState) return false;
 
