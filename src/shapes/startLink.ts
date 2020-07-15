@@ -15,6 +15,7 @@ export class StartLink extends Link {
   }
 
   isValid(allDrawings: Drawing[]): boolean {
+    if (!this.endState) return false;
     for (let drawing of allDrawings) {
       if (drawing instanceof StartLink) return false;
     }
@@ -22,6 +23,7 @@ export class StartLink extends Link {
   }
 
   containsPoint(x: number, y: number): boolean {
+    if (!this.endState) return false;
     var stuff = this.getEndPoints();
     var dx = stuff.endX - stuff.startX;
     var dy = stuff.endY - stuff.startY;

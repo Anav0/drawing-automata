@@ -14,7 +14,7 @@ class Api {
         type,
         automata,
       }),
-    }).then((response) => response.json());
+    });
   }
 }
 

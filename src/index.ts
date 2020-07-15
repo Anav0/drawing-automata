@@ -183,7 +183,7 @@ const draw = () => {
   drawings.map((drawing) => drawing.draw());
   if (tmpLink) tmpLink.draw();
 
-  //storage.store(drawings);
+  storage.store(drawings);
 };
 
 const clearCanvas = () => {
@@ -245,17 +245,18 @@ const drawAutomata = (automata: Automata) => {
     return ret;
   };
 
-  const createOrRetriveState = (stateIndex) => {
+  const createOrRetriveState = (stateIndex, y) => {
     let state;
     if (drawnStates[stateIndex] !== undefined) state = drawnStates[stateIndex];
     else {
       state = new State(
         ctx,
         baseX,
-        baseY,
+        y,
         Drawing.style.r,
         flipedStatesLookup[stateIndex]
       );
+      if (automata.states[stateIndex] === 1) state.isAccepting = true;
       drawings.push(state);
       drawnStates[stateIndex] = state;
     }
@@ -272,6 +273,7 @@ const drawAutomata = (automata: Automata) => {
   let baseY = 100;
   let flipedStatesLookup = objectFlip(automata.statesLookup);
   let flipedSymbolsLookup = objectFlip(automata.symbolsLookup);
+  let backAndForthLinks = new Set<string>();
   let drawFromQueque = [];
   for (let key in flipedStatesLookup) {
     drawFromQueque.push(key);
@@ -298,22 +300,22 @@ const drawAutomata = (automata: Automata) => {
 
   //Draw the rest of states
   while (drawFromQueque.length > 0) {
+    let y = baseY;
     let stateToDrawnFrom = drawFromQueque.pop();
     let statesToDraw = automata.transitions[stateToDrawnFrom];
     let symbolIndex = 0;
     let prevLink: Link;
-    let prevStateIndex;
 
     for (let stateIndex of statesToDraw) {
-      let state = createOrRetriveState(stateIndex);
-      let drawnFromState = createOrRetriveState(stateToDrawnFrom);
+      let state = createOrRetriveState(stateIndex, y);
+      let drawnFromState = createOrRetriveState(stateToDrawnFrom, y);
 
       //Check if its selflink
       if (stateIndex == stateToDrawnFrom) {
         let selfLink;
         if (prevLink && prevLink.endState.id == state.id) selfLink = prevLink;
         else {
-          selfLink = new SelfLink(ctx, baseX, baseY, state);
+          selfLink = new SelfLink(ctx, baseX, y, state);
           drawings.push(selfLink);
         }
         selfLink.text += flipedSymbolsLookup[symbolIndex];
@@ -324,12 +326,22 @@ const drawAutomata = (automata: Automata) => {
           prevLink.text += flipedSymbolsLookup[symbolIndex];
         } else {
           let link = new StatesLink(ctx, baseX, midY, drawnFromState);
+
           link.endState = state;
           link.text = flipedSymbolsLookup[symbolIndex];
           drawings.push(link);
+
           prevLink = link;
 
-          baseX += 200;
+          y += 150;
+
+          let key = (state.text + drawnFromState.text)
+            .split("")
+            .sort()
+            .join("");
+          backAndForthLinks[key]
+            ? backAndForthLinks[key].push(link)
+            : (backAndForthLinks[key] = [link]);
         }
       }
 
@@ -339,23 +351,31 @@ const drawAutomata = (automata: Automata) => {
       }
 
       symbolIndex++;
-      prevStateIndex = stateIndex;
+    }
+    baseX += 200;
+  }
+
+  for (let key in backAndForthLinks) {
+    let links = backAndForthLinks[key];
+    if (links.length < 2) continue;
+    let modi = 1;
+    for (let link of links) {
+      link.y = link.y + 100;
+      link.move(link.x, link.y * modi);
+      modi = -1;
     }
   }
-  console.log(drawings);
   redraw();
 };
 
 async function minimize() {
   try {
     automata = new Automata(drawings);
-
     const response = await api.minimize(minimalizationType, automata);
-    let minimizaedAutomata = response as Automata;
-    console.log(minimizaedAutomata);
+    if (!response.ok) throw Error(await response.text());
+    let minimizaedAutomata = (await response.json()) as Automata;
     drawAutomata(minimizaedAutomata);
   } catch (error) {
-    console.log(error);
     alert(error.message);
   }
   //TODO: Check if automata is valid

@@ -26,6 +26,7 @@ export class StatesLink extends Link {
   }
 
   containsPoint(x: number, y: number): boolean {
+    if (!this.endState) return false;
     var stuff = this.getEndPointsAndCircle();
     if (stuff.hasCircle) {
       var dx = x - stuff.circleX;
@@ -92,7 +93,7 @@ export class StatesLink extends Link {
   move(mouseX: number, mouseY: number): void {
     this.endX = mouseX;
     this.endY = mouseY;
-    if (this.endState) this.setAnchorPoint();
+    if (this.endState) this.setAnchorPoint(mouseX, mouseY);
   }
 
   delete(drawings: Drawing[]): Drawing[] {
@@ -249,10 +250,7 @@ export class StatesLink extends Link {
     };
   }
 
-  setAnchorPoint() {
-    let mousePos = getMousePosOnCanvas(this.ctx.canvas);
-    let x = mousePos.x;
-    let y = mousePos.y;
+  setAnchorPoint(x, y) {
     let diffX = this.endState.x - this.startState.x;
     let diffY = this.endState.y - this.startState.y;
     let scale = Math.sqrt(diffX * diffX + diffY * diffY);
