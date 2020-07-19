@@ -4,6 +4,8 @@ import { Link } from "./shapes/Link.js";
 import { AutomataDrawing } from "./shapes/automataDrawing.js";
 import { StatesLink } from "./shapes/StatesLink.js";
 import { SelfLink } from "./shapes/selfLink.js";
+import notificationManager from "./services/notificationManager.js";
+import "./components.js";
 
 import {
   getDrawingsUnderCursor,
@@ -15,6 +17,7 @@ import { LocalStorage, DrawingsStorage } from "./helpers/storage.js";
 import { Automata } from "./helpers/automata.js";
 import { api } from "./api/index.js";
 import { MinimizationType } from "./helpers/minimalizationType.js";
+import { NotificationModel } from "./models/notificationModel.js";
 
 var canvas: HTMLCanvasElement;
 var ctx: CanvasRenderingContext2D;
@@ -370,13 +373,22 @@ const drawAutomata = (automata: Automata) => {
 
 async function minimize() {
   try {
+    notificationManager.clear();
     automata = new Automata(drawings);
     const response = await api.minimize(minimalizationType, automata);
-    if (!response.ok) throw Error(await response.text());
+    if (!response.ok) {
+      const apiError = await response.json();
+      notificationManager.showNotification(
+        new NotificationModel(apiError.title, apiError.desc)
+      );
+      return;
+    }
     let minimizaedAutomata = (await response.json()) as Automata;
     drawAutomata(minimizaedAutomata);
   } catch (error) {
-    alert(error.message);
+    notificationManager.showNotification(
+      new NotificationModel("Some title", error.message)
+    );
   }
   //TODO: Check if automata is valid
 }

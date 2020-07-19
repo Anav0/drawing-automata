@@ -1,4 +1,5 @@
 import { DrawingStyle } from "../style/drawingStyle.js";
+import { Uuid } from "../helpers/uuid.js";
 
 export abstract class Drawing {
   id: string;
@@ -13,7 +14,7 @@ export abstract class Drawing {
     this.x = x;
     this.y = y;
     this.ctx = ctx;
-    this.id = uuidv4();
+    this.id = Uuid.uuidv4();
   }
 
   abstract draw(): Drawing;
@@ -21,11 +22,3 @@ export abstract class Drawing {
   abstract move(mouseX: number, mouseY: number): void;
   abstract containsPoint(x: number, y: number): boolean;
 }
-
-const uuidv4 = () => {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
