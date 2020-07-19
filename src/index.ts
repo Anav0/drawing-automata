@@ -382,22 +382,30 @@ async function minimize() {
     notificationManager.clear();
     automata = new Automata(drawings);
     const response = await api.minimize(minimalizationType, automata);
-    if (!response.ok) {
+    if (response.status == 400) {
       const apiError = await response.json();
       notificationManager.showNotification(
         new NotificationModel(apiError.title, apiError.desc)
       );
-      return;
+    } else if (response.status == 200) {
+      let minimizaedAutomata = (await response.json()) as Automata;
+      drawAutomata(minimizaedAutomata);
+      notificationManager.showNotification(
+        new NotificationModel("Done!", "Automata has been minimized")
+      );
+    } else if (response.status == 429) {
+      notificationManager.showNotification(
+        new NotificationModel("Error", "Too many requests")
+      );
+    } else {
+      let text = await response.text();
+      notificationManager.showNotification(
+        new NotificationModel("Error", text)
+      );
     }
-    let minimizaedAutomata = (await response.json()) as Automata;
-    drawAutomata(minimizaedAutomata);
-    notificationManager.showNotification(
-      new NotificationModel("Done!", "Automata has been minimized")
-    );
   } catch (error) {
     notificationManager.showNotification(
       new NotificationModel("Error", error.message)
     );
   }
-  //TODO: Check if automata is valid
 }
