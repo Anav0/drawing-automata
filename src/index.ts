@@ -259,12 +259,15 @@ const drawAutomata = (automata: Automata) => {
         Drawing.style.r,
         flipedStatesLookup[stateIndex]
       );
-      if (automata.states[stateIndex] === 1) state.isAccepting = true;
       drawings.push(state);
       drawnStates[stateIndex] = state;
     }
 
     return state;
+  };
+
+  const markAsFinal = (stateIndex: number, state: State) => {
+    if (automata.states[stateIndex] === 1) state.isAccepting = true;
   };
 
   drawings = [];
@@ -292,6 +295,7 @@ const drawAutomata = (automata: Automata) => {
     Drawing.style.r,
     flipedStatesLookup[automata.startingState]
   );
+  markAsFinal(automata["startingState"], startState);
   baseX -= 150;
   drawnStates[automata.startingState] = startState;
 
@@ -312,6 +316,8 @@ const drawAutomata = (automata: Automata) => {
     for (let stateIndex of statesToDraw) {
       let state = createOrRetriveState(stateIndex, y);
       let drawnFromState = createOrRetriveState(stateToDrawnFrom, y);
+      markAsFinal(stateIndex, state);
+      markAsFinal(flipedStatesLookup[drawnFromState.text], drawnFromState);
 
       //Check if its selflink
       if (stateIndex == stateToDrawnFrom) {
@@ -387,7 +393,7 @@ async function minimize() {
     drawAutomata(minimizaedAutomata);
   } catch (error) {
     notificationManager.showNotification(
-      new NotificationModel("Some title", error.message)
+      new NotificationModel("Error", error.message)
     );
   }
   //TODO: Check if automata is valid
