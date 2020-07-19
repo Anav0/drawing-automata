@@ -3,7 +3,7 @@ export class DrawingStyle {
   lineThickness: number = 4;
   stateBg: string = "transparent";
   highlightColor: string = "teal";
-  textStyle: string = "bold 24px serif";
+  textStyle: string = "900 21px Lato";
   arrowHeadSize: number = 20;
   snap: number = 10;
   selectPadding: number = 10;
