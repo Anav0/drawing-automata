@@ -391,6 +391,9 @@ async function minimize() {
     }
     let minimizaedAutomata = (await response.json()) as Automata;
     drawAutomata(minimizaedAutomata);
+    notificationManager.showNotification(
+      new NotificationModel("Done!", "Automata has been minimized")
+    );
   } catch (error) {
     notificationManager.showNotification(
       new NotificationModel("Error", error.message)
