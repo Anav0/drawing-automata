@@ -5,7 +5,9 @@
     "target": "es6",
     "outDir": "build",
     "removeComments": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowJs": true,
+    "sourceMap": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]

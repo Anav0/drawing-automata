@@ -1,6 +1,6 @@
-import { Drawing } from "../shapes/drawing.js";
-import { Link } from "../shapes/link.js";
-import { State } from "../shapes/state.js";
+import { Drawing } from "../shapes/drawing";
+import { Link } from "../shapes/link";
+import { State } from "../shapes/state";
 
 export const getMousePosOnCanvas = (canvas: HTMLCanvasElement) => {
   let rect = canvas.getBoundingClientRect();

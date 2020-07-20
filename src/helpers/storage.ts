@@ -1,6 +1,6 @@
-import { Drawing } from "../shapes/drawing.js";
-import { registry } from "./serializable.js";
-import { State } from "../shapes/state.js";
+import { Drawing } from "../shapes/drawing";
+import { registry } from "./serializable";
+import { State } from "../shapes/state";
 
 export interface DrawingsStorage {
   store(drawings: Drawing[]);

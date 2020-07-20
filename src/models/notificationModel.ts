@@ -1,4 +1,4 @@
-import { Uuid } from "../helpers/uuid.js";
+import { Uuid } from "../helpers/uuid";
 
 export class NotificationModel {
   readonly id: string;

@@ -1,8 +1,8 @@
-import { Drawing } from "../shapes/drawing.js";
-import { State } from "../shapes/state.js";
-import { StartLink } from "../shapes/startLink.js";
-import { SelfLink } from "../shapes/selfLink.js";
-import { StatesLink } from "../shapes/StatesLink.js";
+import { Drawing } from "../shapes/drawing";
+import { State } from "../shapes/state";
+import { StartLink } from "../shapes/startLink";
+import { SelfLink } from "../shapes/selfLink";
+import { StatesLink } from "../shapes/statesLink";
 
 export class Automata {
   // index of start state

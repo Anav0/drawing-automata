@@ -1,10 +1,10 @@
-import { Drawing } from "./drawing.js";
-import { AutomataDrawing } from "./automataDrawing.js";
-import { Link } from "./Link.js";
-import { StatesLink } from "./StatesLink.js";
-import { serializable } from "../helpers/serializable.js";
-import { SelfLink } from "./selfLink.js";
-import { StartLink } from "./startLink.js";
+import { Drawing } from "./drawing";
+import { AutomataDrawing } from "./automataDrawing";
+import { Link } from "./link";
+import { StatesLink } from "./statesLink";
+import { serializable } from "../helpers/serializable";
+import { SelfLink } from "./selfLink";
+import { StartLink } from "./startLink";
 
 @serializable
 export class State extends AutomataDrawing {

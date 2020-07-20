@@ -1,4 +1,4 @@
-import { Drawing } from "./drawing.js";
+import { Drawing } from "./drawing";
 
 export abstract class AutomataDrawing extends Drawing {
   text: string;

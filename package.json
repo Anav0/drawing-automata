@@ -19,25 +19,31 @@
     "Hopcroft"
   ],
   "scripts": {
-    "start": "run-s build:assets | run-s watch | run-s serve",
-    "serve": "es-dev-server --app-index build/index.html --watch --node-resolve --root-dir \"build\" --open ./",
-    "build": "run-s build:*",
-    "build:assets": "copyfiles -u 1 \"src/**/*.js\" \"src/**/*.css\" \"src/**/*.html\" \"src/**/*.{png,jpg,gif,svg}\" build | copyfiles \"node_modules/**\" build",
-    "build:tsc": "tsc",
-    "watch": "run-s watch:*",
-    "watch:tsc": "tsc -w",
-    "watch:assets": "onchange \"src/**/*.js\" \"src/**/*.css\" \"src/**/*.html\" \"src/**/*.{png,jpg,gif}\" -- run-s build:assets"
+    "dev": "webpack-dev-server --open",
+    "watch": "webpack --watch",
+    "build": "webpack"
   },
   "devDependencies": {
     "browser-sync": "^2.26.7",
+    "clean-webpack-plugin": "^3.0.0",
     "copyfiles": "^2.2.0",
+    "css-loader": "^3.6.0",
     "es-dev-server": "^1.56.1",
+    "file-loader": "^6.0.0",
+    "html-webpack-plugin": "^4.3.0",
     "node-sass": "^4.14.1",
     "npm-run-all": "^4.1.5",
     "onchange": "^7.0.2",
-    "typescript": "^3.9.3"
+    "style-loader": "^1.2.1",
+    "svg-inline-loader": "^0.8.2",
+    "ts-loader": "^8.0.1",
+    "typescript": "^3.9.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "dotenv": "^8.2.0",
     "lit-element": "^2.3.1"
   }
 }

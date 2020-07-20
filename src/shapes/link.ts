@@ -1,6 +1,6 @@
-import { Drawing } from "./drawing.js";
-import { AutomataDrawing } from "./automataDrawing.js";
-import { State } from "./state.js";
+import { Drawing } from "./drawing";
+import { AutomataDrawing } from "./automataDrawing";
+import { State } from "./state";
 
 export abstract class Link extends AutomataDrawing {
   endX: number;

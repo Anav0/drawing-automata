@@ -1,5 +1,5 @@
-import { DrawingStyle } from "../style/drawingStyle.js";
-import { Uuid } from "../helpers/uuid.js";
+import { DrawingStyle } from "../style/drawingStyle";
+import { Uuid } from "../helpers/uuid";
 
 export abstract class Drawing {
   id: string;

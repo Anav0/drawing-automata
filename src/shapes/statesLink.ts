@@ -1,8 +1,8 @@
-import { Drawing } from "./drawing.js";
-import { Link } from "./Link.js";
-import { State } from "./state.js";
-import { serializable } from "../helpers/serializable.js";
-import { getMousePosOnCanvas } from "../helpers/index.js";
+import { Drawing } from "./drawing";
+import { Link } from "./link";
+import { State } from "./state";
+import { serializable } from "../helpers/serializable";
+import { getMousePosOnCanvas } from "../helpers/index";
 
 @serializable
 export class StatesLink extends Link {

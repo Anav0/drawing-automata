@@ -1,7 +1,7 @@
-import { Drawing } from "./drawing.js";
-import { Link } from "./link.js";
-import { State } from "./state.js";
-import { serializable } from "../helpers/serializable.js";
+import { Drawing } from "./drawing";
+import { Link } from "./link";
+import { State } from "./state";
+import { serializable } from "../helpers/serializable";
 
 @serializable
 export class SelfLink extends Link {

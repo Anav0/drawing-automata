@@ -1,23 +1,25 @@
-import { State } from "./shapes/state.js";
-import { Drawing } from "./shapes/drawing.js";
-import { Link } from "./shapes/Link.js";
-import { AutomataDrawing } from "./shapes/automataDrawing.js";
-import { StatesLink } from "./shapes/StatesLink.js";
-import { SelfLink } from "./shapes/selfLink.js";
-import notificationManager from "./services/notificationManager.js";
-import "./components.js";
+import { State } from "./shapes/state";
+import { Drawing } from "./shapes/drawing";
+import { Link } from "./shapes/link";
+import { AutomataDrawing } from "./shapes/automataDrawing";
+import { StatesLink } from "./shapes/statesLink";
+import { SelfLink } from "./shapes/selfLink";
+import notificationManager from "./services/notificationManager";
+import "./style/index.css";
+import "./components";
 
 import {
   getDrawingsUnderCursor,
   getMousePosOnCanvas,
   snapState,
-} from "./helpers/index.js";
-import { StartLink } from "./shapes/startLink.js";
-import { LocalStorage, DrawingsStorage } from "./helpers/storage.js";
-import { Automata } from "./helpers/automata.js";
-import { api } from "./api/index.js";
-import { MinimizationType } from "./helpers/minimalizationType.js";
-import { NotificationModel } from "./models/notificationModel.js";
+} from "./helpers";
+import { StartLink } from "./shapes/startLink";
+import { LocalStorage, DrawingsStorage } from "./helpers/storage";
+import { Automata } from "./helpers/automata";
+import { api } from "./api/index";
+import { MinimizationType } from "./helpers/minimalizationType";
+import { NotificationModel } from "./models/notificationModel";
+require("file-loader?name=[name].[ext]!./index.html");
 
 var canvas: HTMLCanvasElement;
 var ctx: CanvasRenderingContext2D;

@@ -1,2 +1,2 @@
-import "./components/notification.js";
-import "./components/notificationList.js";
+import "./components/notification";
+import "./components/notificationList";

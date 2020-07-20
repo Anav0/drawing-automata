@@ -18,6 +18,9 @@ body {
 #canvas {
   border: 5px solid black;
 }
+.hidden {
+  display: none;
+}
 .common-shadow,
 select,
 button {

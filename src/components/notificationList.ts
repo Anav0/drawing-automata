@@ -1,10 +1,10 @@
 import { LitElement, html, css, property, customElement } from "lit-element";
-import { NotificationModel } from "../models/notificationModel.js";
-import { IObserver, ISubject } from "../services/observerPattern.js";
-import { Uuid } from "../helpers/uuid.js";
+import { NotificationModel } from "../models/notificationModel";
+import { IObserver, ISubject } from "../services/observerPattern";
+import { Uuid } from "../helpers/uuid";
 import notifcationManager, {
   NotificationManager,
-} from "../services/notificationManager.js";
+} from "../services/notificationManager";
 
 @customElement("my-notifications")
 export class NotificationsList extends LitElement implements IObserver {
