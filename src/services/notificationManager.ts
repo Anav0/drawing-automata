@@ -1,5 +1,5 @@
-import { NotificationModel } from "../models/notificationModel";
-import { ISubject, IObserver } from "./observerPattern";
+import { NotificationModel } from "../models/notificationModel.js";
+import { ISubject, IObserver } from "./observerPattern.js";
 
 export class NotificationManager implements ISubject {
   private _notifications: NotificationModel[] = [];

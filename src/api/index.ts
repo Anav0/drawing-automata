@@ -1,7 +1,8 @@
 import { MinimizationType } from "../helpers/minimalizationType";
 import { Automata } from "../helpers/automata";
 
-const url = "http://127.0.0.1:5000";
+//TODO: move to enviroment variable
+const url = "https://automata-server-oepzwdr6xa-ew.a.run.app";
 
 class Api {
   minimize(type: MinimizationType, automata: Automata) {
