@@ -104,6 +104,7 @@ const onDbClick = () => {
 };
 
 const onKeyDown = (event) => {
+  event.preventDefault();
   if (event.key.toLowerCase() == "backspace") {
     input = input.slice(0, -1);
   } else if (event.key.toLowerCase() == "delete") {
