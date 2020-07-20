@@ -8,7 +8,7 @@ module.exports = () => {
     devServer: {
       contentBase: "./build",
     },
-    plugins: [new dotenv()],
+    plugins: [new dotenv({ systemvars: true })],
     module: {
       rules: [
         {
