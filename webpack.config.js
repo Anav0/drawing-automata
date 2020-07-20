@@ -1,16 +1,6 @@
 const path = require("path");
-const webpack = require("webpack");
-const dotenv = require("dotenv");
-
+const dotenv = require("dotenv-webpack");
 module.exports = () => {
-  const env = dotenv.config().parsed;
-  let envKeys = [];
-  if (env) {
-    envKeys = Object.keys(env).reduce((prev, next) => {
-      prev[`process.env.${next}`] = JSON.stringify(env[next]);
-      return prev;
-    }, {});
-  }
   return {
     mode: "development",
     entry: "./src/index.ts",
@@ -18,7 +8,7 @@ module.exports = () => {
     devServer: {
       contentBase: "./build",
     },
-    plugins: [new webpack.DefinePlugin(envKeys)],
+    plugins: [new dotenv()],
     module: {
       rules: [
         {
